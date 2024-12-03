@@ -1,0 +1,42 @@
+{
+  "name": "ts-codenames",
+  "type": "module",
+  "scripts": {
+    "dev": "vinxi dev --port 3001 --host",
+    "build": "vinxi build",
+    "start": "vinxi start --port 3001"
+  },
+  "dependencies": {
+    "@radix-ui/react-label": "^2.1.0",
+    "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-switch": "^1.1.1",
+    "@tanstack/react-router": "^1.58.7",
+    "@tanstack/router-devtools": "^1.58.3",
+    "@tanstack/start": "^1.85.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.441.0",
+    "posthog-js": "^1.164.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^2.5.5",
+    "tailwindcss-3d": "^1.0.7",
+    "ts-pattern": "^5.5.0",
+    "vinxi": "^0.4.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "@types/react": "^18.3.6",
+    "@types/react-dom": "^18.3.0",
+    "vite-tsconfig-paths": "^5.0.1",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

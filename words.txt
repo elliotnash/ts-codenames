@@ -1,0 +1,1 @@
+Arc,Pitch,Ward,Bolt,Cane,Line,Mask,Grain,Bark,Track,Beam,Wing,Cove,Forge,Pulse,Crest,Shade,Plume,Tide,Horn,Cage,Flare,Vault,Stem,Bridge
