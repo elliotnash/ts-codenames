@@ -241,7 +241,7 @@ function GameCard({
   revealed: boolean;
   onClick: () => void;
 }) {
-  const baseStyle = 'w-36 h-24 place-content-center hover:bg-accent transition-all';
+  const baseStyle = 'aspect-[4/3] flex items-center justify-center cursor-pointer hover:bg-accent';
   return (
     <div className="perspective-1000 cursor-pointer">
       <div
