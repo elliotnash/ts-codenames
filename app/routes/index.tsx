@@ -150,7 +150,7 @@ function Index() {
         <Button>New Game</Button>
       </div>
       {/* <div className="flex flex-col items-center max-w-4xl w-full"></div> */}
-      <div className="grow flex justify-center flex-col m-auto w-full px-6 max-w-5xl max-h-full">
+      <div className="grow flex justify-center flex-col m-auto w-full px-6 max-w-4xl max-h-full">
         <div className="flex justify-between w-full mb-6 px-4">
           <div className="flex space-x-4">
             {redStart > blueStart ? scoreBadges : scoreBadges.reverse()}
@@ -196,7 +196,7 @@ const cardSpymasterVariants = cva('', {
       red: 'border-card-red text-card-red',
       blue: 'border-card-blue text-card-blue',
       bystander: 'border-card-bystander text-card-bystander-foreground',
-      death: 'ring-4 ring-white border-card-death text-card-death',
+      death: 'ring-4 ring-card-death border-card-death text-card-death',
     },
   },
 });

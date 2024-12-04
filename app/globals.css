@@ -33,9 +33,9 @@
     --card-red-foreground: 210 20% 98%;
     --card-blue: 217 91% 60%;
     --card-blue-foreground: 210 20% 98%;
-    --card-bystander: 217 19% 27%;
-    --card-bystander-foreground: 210 20% 98%;
-    --card-death: 216 12% 84%;
+    --card-bystander: 216 12% 84%;
+    --card-bystander-foreground: 210 20% 2%;
+    --card-death: 217 19% 14%;
     --card-death-foreground: 210 20% 98%;
     --invert-amount: 0%;
   }
