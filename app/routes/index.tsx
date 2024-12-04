@@ -3,7 +3,7 @@ import { createServerFn } from '@tanstack/start';
 import { cva } from 'class-variance-authority';
 import { Card, CardContent } from '~/components/ui/card';
 import * as fs from 'node:fs/promises';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { match } from 'ts-pattern';
 import { ServerEventSchema, type RevealCardEventSchema } from '~/socket-events';
 import { z } from 'zod';
@@ -78,22 +78,8 @@ function Index() {
 
   const [revealedCards, setRevealedCards] = useState<Set<number>>(new Set());
 
-  // const { lastJsonMessage } = useWebSocket(`ws://${window.location.host}/_ws`, {
-  //   share: true,
-  // });
-
-  // useEffect(() => {
-  //   // console.log(lastJsonMessage);
-  //   // const { data } = ServerEventSchema.safeParse(lastJsonMessage);
-  //   // if (data) {
-  //   //   match(data).with({ type: 'revealedCardsUpdate' }, (update) => {
-  //   //     setRevealedCards(update.revealedCards);
-  //   //   });
-  //   // }
-  // }, [lastJsonMessage]);
-
+  // Websocket connection for receiving card reveal updates and sending card reveals.
   const connection = useRef<WebSocket | null>(null);
-
   useEffect(() => {
     const socket = new WebSocket(`ws://${window.location.host}/_ws`);
 
@@ -102,7 +88,7 @@ function Index() {
       socket.send('ping');
     });
 
-    // Listen for messages
+    // Listen for messages and handle
     socket.addEventListener('message', (event) => {
       try {
         const jsonMessage = JSON.parse(event.data);
@@ -114,12 +100,11 @@ function Index() {
           });
         }
       } catch (e) {
-        console.log(event.data);
+        console.log("Couldn't parse websocket message:", event.data);
       }
     });
 
     connection.current = socket;
-
     return () => socket.close();
   }, []);
 
@@ -132,28 +117,31 @@ function Index() {
     );
   }
 
-  // return (
-  //   <div className="flex min-h-screen w-full flex-col">
-  //     <div className="grid h-screen place-items-center">
-  //       <div>
-  //         <div className="grid gap-3 grid-cols-5">
-  //           {words.map((word, i) => (
-  //             <GameCard
-  //               onClick={() => revealCard(i)}
-  //               category={categories[i]!}
-  //               key={word}
-  //               spymaster={false}
-  //               revealed={revealedCards.has(i)}
-  //             >
-  //               {word}
-  //             </GameCard>
-  //           ))}
-  //         </div>
-  //       </div>
-  //     </div>
-  //   </div>
-  // );
+  const blueStart = useMemo(() => categories.filter((cat) => cat === 'blue').length, [categories]);
+
+  const redStart = useMemo(() => categories.filter((cat) => cat === 'red').length, [categories]);
+
+  const blueScore = useMemo(
+    () => blueStart - [...revealedCards].filter((card) => categories[card] === 'blue').length,
+    [categories, revealedCards, blueStart],
+  );
+
+  const redScore = useMemo(
+    () => redStart - [...revealedCards].filter((card) => categories[card] === 'red').length,
+    [categories, revealedCards, redStart],
+  );
+
+  // Spymaster toggle
   const [isSpymaster, setIsSpymaster] = useState(false);
+
+  const scoreBadges = [
+    <Badge key="badge-red" variant="secondary" className="text-card-red">
+      Red: {redScore}
+    </Badge>,
+    <Badge key="badge-blue" variant="secondary" className="text-card-blue">
+      Blue: {blueScore}
+    </Badge>,
+  ];
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -165,12 +153,7 @@ function Index() {
       <div className="grow flex justify-center flex-col m-auto w-full px-6 max-w-5xl max-h-full">
         <div className="flex justify-between w-full mb-6 px-4">
           <div className="flex space-x-4">
-            <Badge variant="secondary" className="text-blue-500">
-              Blue: 9
-            </Badge>
-            <Badge variant="secondary" className="text-red-500">
-              Red: 8
-            </Badge>
+            {redStart > blueStart ? scoreBadges : scoreBadges.reverse()}
           </div>
           <div className="flex items-center space-x-2">
             <Switch id="spymaster-mode" checked={isSpymaster} onCheckedChange={setIsSpymaster} />
@@ -184,19 +167,11 @@ function Index() {
               onClick={() => revealCard(i)}
               category={categories[i]!}
               key={word}
-              spymaster={false}
+              spymaster={isSpymaster}
               revealed={revealedCards.has(i)}
             >
               {word}
             </GameCard>
-            // <Card
-            //   key={word}
-            //   className="aspect-[4/3] flex items-center justify-center cursor-pointer hover:bg-accent"
-            // >
-            //   <CardContent className="p-0">
-            //     <p className="text-center font-medium text-sm sm:text-base">{word}</p>
-            //   </CardContent>
-            // </Card>
           ))}
         </div>
       </div>
@@ -207,11 +182,10 @@ function Index() {
 const cardCategoryVariants = cva('', {
   variants: {
     variant: {
-      red: 'bg-red-500 text-white hover:bg-red-400',
-      blue: 'bg-blue-500 text-white hover:bg-blue-400',
-      bystander:
-        'bg-gray-300 text-black dark:text-white hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600',
-      death: 'bg-gray-900 text-white hover:bg-gray-800',
+      red: 'bg-card-red text-card-red-foreground hover:bg-card-red/85',
+      blue: 'bg-card-blue text-card-blue-foreground hover:bg-card-blue/85',
+      bystander: 'bg-card-bystander text-card-bystander-foreground hover:bg-card-bystander/85',
+      death: 'bg-card-death text-card-death-foreground hover:bg-card-death/85',
     },
   },
 });
@@ -219,11 +193,10 @@ const cardCategoryVariants = cva('', {
 const cardSpymasterVariants = cva('', {
   variants: {
     variant: {
-      red: 'border-red-500 text-red-500 hover:border-red-400',
-      blue: 'border-blue-500 text-blue-500 hover:border-blue-400',
-      bystander:
-        'border-gray-300 text-white hover:border-gray-400 dark:border-gray-700 dark:hover:border-gray-600',
-      death: 'border-gray-900 bg-gray-300 text-black hover:bg-gray-400',
+      red: 'border-card-red text-card-red',
+      blue: 'border-card-blue text-card-blue',
+      bystander: 'border-card-bystander text-card-bystander-foreground',
+      death: 'ring-4 ring-white border-card-death text-card-death',
     },
   },
 });
@@ -241,7 +214,8 @@ function GameCard({
   revealed: boolean;
   onClick: () => void;
 }) {
-  const baseStyle = 'aspect-[4/3] flex items-center justify-center cursor-pointer hover:bg-accent';
+  const baseStyle =
+    'aspect-[4/3] flex items-center justify-center cursor-pointer hover:bg-accent transition-all';
   return (
     <div className="perspective-1000 cursor-pointer">
       <div

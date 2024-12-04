@@ -26,6 +26,22 @@ const config = {
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+        'card-red': {
+          DEFAULT: 'hsl(var(--card-red))',
+          foreground: 'hsl(var(--card-red-foreground))',
+        },
+        'card-blue': {
+          DEFAULT: 'hsl(var(--card-blue))',
+          foreground: 'hsl(var(--card-blue-foreground))',
+        },
+        'card-bystander': {
+          DEFAULT: 'hsl(var(--card-bystander))',
+          foreground: 'hsl(var(--card-bystander-foreground))',
+        },
+        'card-death': {
+          DEFAULT: 'hsl(var(--card-death))',
+          foreground: 'hsl(var(--card-death-foreground))',
+        },
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
