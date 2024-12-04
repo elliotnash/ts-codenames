@@ -81,7 +81,8 @@ function Index() {
   // Websocket connection for receiving card reveal updates and sending card reveals.
   const connection = useRef<WebSocket | null>(null);
   useEffect(() => {
-    const socket = new WebSocket(`ws://${window.location.host}/_ws`);
+    const ssl = window.location.protocol === 'https:';
+    const socket = new WebSocket(`${ssl ? 'wss' : 'ws'}://${window.location.host}/_ws`);
 
     // Connection opened
     socket.addEventListener('open', (event) => {
