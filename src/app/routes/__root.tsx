@@ -43,9 +43,7 @@ function RootDocument({ children }: React.PropsWithChildren) {
         <Meta />
       </head>
       <body>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
-        </ThemeProvider>
+        <ThemeProvider>{children}</ThemeProvider>
         <React.Suspense>
           <TanStackRouterDevtools />
         </React.Suspense>

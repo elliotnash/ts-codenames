@@ -17,7 +17,7 @@ const app = defineConfig({
   },
   routers: {
     api: {
-      entry: join(config.appDirectory, 'api-entry.tsx'),
+      entry: join(config.appDirectory, 'api-entry.ts'),
     },
     ssr: {
       entry: join(config.appDirectory, 'ssr-entry.tsx'),
