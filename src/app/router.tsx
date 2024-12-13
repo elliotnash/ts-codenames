@@ -1,5 +1,5 @@
 import { createRouter as createTanStackRouter } from '@tanstack/react-router';
-import { routeTree } from './routeTree.gen';
+import { routeTree } from './route-tree.gen';
 // import { posthog } from 'posthog-js';
 // import { PostHogProvider } from 'posthog-js/react';
 
