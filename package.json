@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "vinxi dev --port 3000 --host",
     "build": "vinxi build",
-    "start": "vinxi start --port 3000"
+    "start": "vinxi start --port 3000",
+    "migrate": "bun run src/migrate.ts"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.1",
@@ -28,13 +29,15 @@
     "pg": "^8.13.1",
     "kysely": "^0.27.5",
     "outdent": "^0.8.0",
-    "@mantine/hooks": "^7.15.1"
+    "@mantine/hooks": "^7.15.1",
+    "string-ts": "^2.2.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.2",
     "@types/pg": "^8.11.10",
+    "@types/bun": "^1.1.14",
     "vite-tsconfig-paths": "^5.1.4",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
