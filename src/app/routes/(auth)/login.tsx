@@ -4,9 +4,14 @@ import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import { useForm, type FieldApi } from '@tanstack/react-form';
 
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { GradientBG } from '~/components/background';
 import { z } from 'zod';
+import { useState } from 'react';
+import { FieldInfo } from '~/components/ui/field-info';
+import { authClient } from '~/lib/auth-client';
+import { useToast } from '~/hooks/use-toast';
+import { LoaderIcon } from 'lucide-react';
 
 export const Route = createFileRoute('/(auth)/login')({
   component: RouteComponent,
@@ -32,6 +37,9 @@ const LoginFormSchema = z.object({
 });
 
 function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'form'>) {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
   const form = useForm({
     defaultValues: {
       email: '',
@@ -40,16 +48,52 @@ function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'form
     validators: {
       onChange: LoginFormSchema,
     },
-    onSubmit: async (values) => {
-      console.log(values);
+    onSubmit: async ({ value }) => {
+      const { data, error } = await authClient.signIn.email({
+        email: value.email,
+        password: value.password,
+      });
+      if (error) {
+        console.log('Log in error');
+        console.log(error);
+        if (error.code === 'INVALID_EMAIL_OR_PASSWORD') {
+          const inUseToast = toast({
+            variant: 'destructiveOutline',
+            title: 'Invalid email or password',
+            description: (
+              <>
+                If you have forgotten your password, you may{' '}
+                <Link
+                  to="/"
+                  className="underline underline-offset-4 transition-colors hover:text-foreground/80"
+                  onClick={() => inUseToast.dismiss()}
+                >
+                  reset your password
+                </Link>
+              </>
+            ),
+          });
+        } else {
+          toast({
+            variant: 'destructiveOutline',
+            title: 'Unknown error signing in',
+            description: 'Please try again later',
+          });
+        }
+      } else {
+        await navigate({ to: '/' });
+      }
     },
   });
+
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   return (
     <form
       className={cn('flex flex-col gap-6', className)}
       {...props}
       onSubmit={(e) => {
+        setHasSubmitted(true);
         e.preventDefault();
         e.stopPropagation();
         form.handleSubmit();
@@ -74,16 +118,13 @@ function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'form
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
                 type="email"
-                placeholder="m@example.com"
+                placeholder="me@example.com"
                 required
               />
+              <FieldInfo field={field} hasSubmitted={hasSubmitted} />
             </div>
           )}
         />
-        {/* <div className="grid gap-2">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" placeholder="m@example.com" required />
-        </div> */}
 
         <form.Field
           name="password"
@@ -107,19 +148,13 @@ function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'form
                 type="password"
                 required
               />
+              <FieldInfo field={field} hasSubmitted={hasSubmitted} />
             </div>
           )}
         />
-        {/* <div className="grid gap-2">
-          <div className="flex items-center">
-            <Label htmlFor="password">Password</Label>
-            <a href="/" className="ml-auto text-sm underline-offset-4 hover:underline">
-              Forgot your password?
-            </a>
-          </div>
-          <Input id="password" type="password" required />
-        </div> */}
+
         <Button type="submit" className="w-full">
+          {form.state.isSubmitting && <LoaderIcon className="animate-spin-slow" />}
           Log in
         </Button>
         <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">

@@ -57,9 +57,9 @@ function RegisterForm({ className, ...props }: React.ComponentPropsWithoutRef<'f
         password: value.password,
         name: value.fullName,
       });
-      console.log(data);
-      console.log(error);
       if (error) {
+        console.log('Registration error');
+        console.log(error);
         if (error.code === 'USER_ALREADY_EXISTS') {
           const inUseToast = toast({
             variant: 'destructiveOutline',
@@ -79,12 +79,13 @@ function RegisterForm({ className, ...props }: React.ComponentPropsWithoutRef<'f
           });
         } else {
           toast({
+            variant: 'destructiveOutline',
             title: 'Unknown error signing up',
             description: 'Please try again later',
           });
         }
       } else {
-        navigate({ to: '/' });
+        await navigate({ to: '/' });
       }
     },
   });
@@ -96,7 +97,6 @@ function RegisterForm({ className, ...props }: React.ComponentPropsWithoutRef<'f
       className={cn('flex flex-col gap-6', className)}
       {...props}
       onSubmit={(e) => {
-        console.log('On Submit called');
         setHasSubmitted(true);
         e.preventDefault();
         e.stopPropagation();
