@@ -4,6 +4,7 @@ import { createRootRoute } from '@tanstack/react-router';
 import { Outlet, ScrollRestoration } from '@tanstack/react-router';
 import { Meta, Scripts } from '@tanstack/start';
 import * as React from 'react';
+import { Toaster } from '~/components/ui/toaster';
 
 export const Route = createRootRoute({
   head: () => ({
@@ -43,7 +44,10 @@ function RootDocument({ children }: React.PropsWithChildren) {
         <Meta />
       </head>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          {children}
+          <Toaster />
+        </ThemeProvider>
         <React.Suspense>
           <TanStackRouterDevtools />
         </React.Suspense>

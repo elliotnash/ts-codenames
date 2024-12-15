@@ -27,18 +27,20 @@ function makeTypedEnvironment<T>(schema: (v: unknown) => T) {
 
 export const PublicEnvSchema = z.object({
   MODE: z.enum(['development', 'production']).optional(),
-  // Analytics
-  VITE_POSTHOG_HOST: z.string().url(),
-  VITE_POSTHOG_KEY: z.string(),
+  // // Analytics
+  // VITE_POSTHOG_HOST: z.string().url(),
+  // VITE_POSTHOG_KEY: z.string(),
 });
 
 export const PrivateEnvSchema = z.object({
+  BETTER_AUTH_SECRET: z.string(),
+  BETTER_AUTH_URL: z.string().url(),
   // packages/database
   DB_NAME: z.string(),
   DB_HOST: z.string(),
   DB_USER: z.string(),
   DB_PASSWORD: z.string(),
-  DB_PORT: z.coerce.number(),
+  DB_PORT: z.coerce.number().default(5432),
   DB_SSL: z.preprocess((val) => {
     if (typeof val === 'string') {
       if (['1', 'true'].includes(val.toLowerCase())) return true;
@@ -54,6 +56,10 @@ export const PrivateEnvSchema = z.object({
   // SMTP_SENDER: z.string(),
   // SMTP_SENDER_NAME: z.string(),
 });
+
+function mergedEnv() {
+  return { ...process.env, ...(import.meta ? import.meta.env : {}) };
+}
 
 const publicTypedEnv = makeTypedEnvironment(PublicEnvSchema.parse);
 
@@ -73,7 +79,7 @@ const publicTypedEnv = makeTypedEnvironment(PublicEnvSchema.parse);
  * console.log(publicEnv().backendUrl); // Logs the value of VITE_BACKEND_URL
  */
 export function publicEnv() {
-  return publicTypedEnv((import.meta && import.meta.env) ?? process.env);
+  return publicTypedEnv(mergedEnv());
 }
 
 const privateTypedEnv = makeTypedEnvironment(PrivateEnvSchema.parse);
@@ -93,5 +99,5 @@ const privateTypedEnv = makeTypedEnvironment(PrivateEnvSchema.parse);
  * console.log(privateEnv().smtpHost); // Logs the value of SMTP_HOST
  */
 export function privateEnv() {
-  return privateTypedEnv((import.meta && import.meta.env) ?? process.env);
+  return privateTypedEnv(mergedEnv());
 }

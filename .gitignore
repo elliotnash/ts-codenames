@@ -10,3 +10,6 @@ node_modules
 
 # secrets
 .env
+
+# Project specific
+better-auth_migrations

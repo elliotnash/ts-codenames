@@ -12,6 +12,7 @@ import { Button } from '~/components/ui/button';
 import { Badge } from '~/components/ui/badge';
 import { Switch } from '~/components/ui/switch';
 import { Label } from '~/components/ui/label';
+import { GradientBG } from '~/components/background';
 
 export const Route = createFileRoute('/')({
   loader: async () => {
@@ -146,6 +147,7 @@ function Index() {
 
   return (
     <div className="flex min-h-screen w-full flex-col">
+      <GradientBG />
       <div className="flex justify-between items-center m-6 px-4">
         <h1 className="text-4xl font-bold">Codenames</h1>
         <Button>New Game</Button>

@@ -25,7 +25,8 @@
         "noNonNullAssertion": "warn"
       },
       "correctness": {
-        "useExhaustiveDependencies": "warn"
+        "useExhaustiveDependencies": "warn",
+        "noChildrenProp": "off"
       }
     }
   },

@@ -1,20 +1,55 @@
-CREATE TABLE accounts (
-    cuid TEXT PRIMARY KEY,
-    email TEXT UNIQUE,
-    password_hash TEXT
+CREATE TABLE "user" (
+  "id" text not null primary key,
+  "name" text not null,
+  "email" text not null unique,
+  "emailVerified" boolean not null,
+  "image" text,
+  "createdAt" timestamp not null,
+  "updatedAt" timestamp not null
 );
 
-CREATE TABLE sessions (
-    session_cuid TEXT PRIMARY KEY,
-    account_cuid TEXT REFERENCES accounts(cuid)
+create table "session" (
+  "id" text not null primary key,
+  "expiresAt" timestamp not null,
+  "token" text not null unique,
+  "createdAt" timestamp not null,
+  "updatedAt" timestamp not null,
+  "ipAddress" text,
+  "userAgent" text,
+  "userId" text not null references "user"("id")
+);
+
+create table "account" (
+  "id" text not null primary key,
+  "accountId" text not null,
+  "providerId" text not null,
+  "userId" text not null references "user"("id"),
+  "accessToken" text,
+  "refreshToken" text,
+  "idToken" text,
+  "accessTokenExpiresAt" timestamp,
+  "refreshTokenExpiresAt" timestamp,
+  "scope" text,
+  "password" text,
+  "createdAt" timestamp not null,
+  "updatedAt" timestamp not null
+);
+
+create table "verification" (
+  "id" text not null primary key,
+  "identifier" text not null,
+  "value" text not null,
+  "expiresAt" timestamp not null,
+  "createdAt" timestamp,
+  "updatedAt" timestamp
 );
 
 CREATE TYPE cardCategory AS ENUM ('red', 'blue', 'bystander', 'death');
 
-CREATE TABLE current_games (
-    id TEXT PRIMARY KEY,
-    owner_cuid TEXT REFERENCES accounts(cuid),
-    words TEXT[25],
-    categories cardCategory[25],
-    revealed INT[25]
+CREATE TABLE "current_games" (
+  "id" TEXT PRIMARY KEY,
+  "ownerId" TEXT REFERENCES "user"(id),
+  "words" TEXT[25],
+  "categories" cardCategory[25],
+  "revealed" INT[25]
 );
