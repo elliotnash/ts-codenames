@@ -2,6 +2,7 @@ import { defineConfig } from '@tanstack/start/config';
 import { exec } from 'node:child_process';
 import { join } from 'node:path';
 import tsConfigPaths from 'vite-tsconfig-paths';
+import { envOnlyMacros } from 'vite-env-only';
 
 const config = {
   appDirectory: 'src/app',
@@ -45,7 +46,7 @@ const app = defineConfig({
     },
   },
   vite: {
-    plugins: [tsConfigPaths()],
+    plugins: [tsConfigPaths(), envOnlyMacros()],
   },
 }).addRouter({
   name: 'websocket',
