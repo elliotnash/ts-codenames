@@ -2,7 +2,7 @@ import { useForm } from '@tanstack/react-form';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { z } from 'zod';
-import { GradientBG } from '~/components/background';
+import { GridBG } from '~/components/background';
 import { Button } from '~/components/ui/button';
 import { FieldInfo } from '~/components/ui/field-info';
 import { Input } from '~/components/ui/input';
@@ -20,7 +20,7 @@ export const Route = createFileRoute('/(auth)/register')({
 function RouteComponent() {
   return (
     <div>
-      <GradientBG />
+      <GridBG />
 
       <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
         <div className="w-full max-w-sm">
