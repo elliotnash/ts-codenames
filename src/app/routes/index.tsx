@@ -6,13 +6,15 @@ import * as fs from 'node:fs/promises';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { match } from 'ts-pattern';
 import { ServerEventSchema, type RevealCardEventSchema } from '~/socket-events';
-import { z } from 'zod';
 import { cn } from '~/lib/utils';
 import { Button } from '~/components/ui/button';
 import { Badge } from '~/components/ui/badge';
 import { Switch } from '~/components/ui/switch';
 import { Label } from '~/components/ui/label';
 import { GradientBG } from '~/components/background';
+import { authClient } from '~/lib/auth-client';
+import { CircleUserRound } from 'lucide-react';
+import { UserMenu } from '~/components/user-menu';
 
 export const Route = createFileRoute('/')({
   loader: async () => {
@@ -75,6 +77,7 @@ const getGameCategories = createServerFn().handler(async () => {
 });
 
 function Index() {
+  const session = authClient.useSession();
   const { words, categories } = Route.useLoaderData();
 
   const [revealedCards, setRevealedCards] = useState<Set<number>>(new Set());
@@ -150,9 +153,11 @@ function Index() {
       <GradientBG />
       <div className="flex justify-between items-center m-6 px-4">
         <h1 className="text-4xl font-bold">Codenames</h1>
-        <Button>New Game</Button>
+        <div className="flex gap-2">
+          <Button variant="ghost">New Game</Button>
+          <UserMenu />
+        </div>
       </div>
-      {/* <div className="flex flex-col items-center max-w-4xl w-full"></div> */}
       <div className="grow flex justify-center flex-col m-auto w-full px-6 max-w-4xl max-h-full">
         <div className="flex justify-between w-full mb-6 px-4">
           <div className="flex space-x-4">
