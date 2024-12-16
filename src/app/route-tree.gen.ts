@@ -11,15 +11,29 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root';
+import { Route as HowToPlayImport } from './routes/how-to-play';
 import { Route as IndexImport } from './routes/index';
+import { Route as GameIdImport } from './routes/game/$id';
 import { Route as authRegisterImport } from './routes/(auth)/register';
 import { Route as authLoginImport } from './routes/(auth)/login';
 
 // Create/Update Routes
 
+const HowToPlayRoute = HowToPlayImport.update({
+  id: '/how-to-play',
+  path: '/how-to-play',
+  getParentRoute: () => rootRoute,
+} as any);
+
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any);
+
+const GameIdRoute = GameIdImport.update({
+  id: '/game/$id',
+  path: '/game/$id',
   getParentRoute: () => rootRoute,
 } as any);
 
@@ -46,6 +60,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport;
       parentRoute: typeof rootRoute;
     };
+    '/how-to-play': {
+      id: '/how-to-play';
+      path: '/how-to-play';
+      fullPath: '/how-to-play';
+      preLoaderRoute: typeof HowToPlayImport;
+      parentRoute: typeof rootRoute;
+    };
     '/(auth)/login': {
       id: '/(auth)/login';
       path: '/login';
@@ -60,6 +81,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authRegisterImport;
       parentRoute: typeof rootRoute;
     };
+    '/game/$id': {
+      id: '/game/$id';
+      path: '/game/$id';
+      fullPath: '/game/$id';
+      preLoaderRoute: typeof GameIdImport;
+      parentRoute: typeof rootRoute;
+    };
   }
 }
 
@@ -67,42 +95,58 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute;
+  '/how-to-play': typeof HowToPlayRoute;
   '/login': typeof authLoginRoute;
   '/register': typeof authRegisterRoute;
+  '/game/$id': typeof GameIdRoute;
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute;
+  '/how-to-play': typeof HowToPlayRoute;
   '/login': typeof authLoginRoute;
   '/register': typeof authRegisterRoute;
+  '/game/$id': typeof GameIdRoute;
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute;
   '/': typeof IndexRoute;
+  '/how-to-play': typeof HowToPlayRoute;
   '/(auth)/login': typeof authLoginRoute;
   '/(auth)/register': typeof authRegisterRoute;
+  '/game/$id': typeof GameIdRoute;
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: '/' | '/login' | '/register';
+  fullPaths: '/' | '/how-to-play' | '/login' | '/register' | '/game/$id';
   fileRoutesByTo: FileRoutesByTo;
-  to: '/' | '/login' | '/register';
-  id: '__root__' | '/' | '/(auth)/login' | '/(auth)/register';
+  to: '/' | '/how-to-play' | '/login' | '/register' | '/game/$id';
+  id:
+    | '__root__'
+    | '/'
+    | '/how-to-play'
+    | '/(auth)/login'
+    | '/(auth)/register'
+    | '/game/$id';
   fileRoutesById: FileRoutesById;
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
+  HowToPlayRoute: typeof HowToPlayRoute;
   authLoginRoute: typeof authLoginRoute;
   authRegisterRoute: typeof authRegisterRoute;
+  GameIdRoute: typeof GameIdRoute;
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  HowToPlayRoute: HowToPlayRoute,
   authLoginRoute: authLoginRoute,
   authRegisterRoute: authRegisterRoute,
+  GameIdRoute: GameIdRoute,
 };
 
 export const routeTree = rootRoute
@@ -116,18 +160,26 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/how-to-play",
         "/(auth)/login",
-        "/(auth)/register"
+        "/(auth)/register",
+        "/game/$id"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/how-to-play": {
+      "filePath": "how-to-play.tsx"
     },
     "/(auth)/login": {
       "filePath": "(auth)/login.tsx"
     },
     "/(auth)/register": {
       "filePath": "(auth)/register.tsx"
+    },
+    "/game/$id": {
+      "filePath": "game/$id.tsx"
     }
   }
 }
