@@ -1,12 +1,14 @@
 import { ThemeProvider } from '~/components/theme';
 import styles from '~/globals.css?url';
-import { createRootRoute } from '@tanstack/react-router';
+import { createRootRouteWithContext } from '@tanstack/react-router';
 import { Outlet, ScrollRestoration } from '@tanstack/react-router';
 import { Meta, Scripts } from '@tanstack/start';
 import * as React from 'react';
 import { Toaster } from '~/components/ui/toaster';
+import type { RouterContext } from '~/router';
+import { publicEnv } from '@/env';
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
@@ -27,16 +29,23 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: React.PropsWithChildren) {
-  const TanStackRouterDevtools =
-    // publicEnv().mode === 'production'
-    // biome-ignore lint/correctness/noConstantCondition: <explanation>
-    true
-      ? () => null // Render nothing in production
-      : React.lazy(async () => {
-          // Lazy load in development
-          const { TanStackRouterDevtools } = await import('@tanstack/router-devtools');
-          return { default: TanStackRouterDevtools };
-        });
+  const RouterDevtools =
+    publicEnv().mode === 'production'
+      ? () => null
+      : React.lazy(() =>
+          import('@tanstack/router-devtools').then((mod) => ({
+            default: mod.TanStackRouterDevtools,
+          })),
+        );
+
+  const QueryDevtools =
+    publicEnv().mode === 'production'
+      ? () => null
+      : React.lazy(() =>
+          import('@tanstack/react-query-devtools').then((mod) => ({
+            default: mod.ReactQueryDevtools,
+          })),
+        );
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -49,7 +58,8 @@ function RootDocument({ children }: React.PropsWithChildren) {
           <Toaster />
         </ThemeProvider>
         <React.Suspense>
-          <TanStackRouterDevtools />
+          <RouterDevtools />
+          <QueryDevtools />
         </React.Suspense>
         <ScrollRestoration />
         <Scripts />
