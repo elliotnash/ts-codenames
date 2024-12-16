@@ -2,6 +2,7 @@ import { defineConfig } from '@tanstack/start/config';
 import { exec } from 'node:child_process';
 import { join } from 'node:path';
 import tsConfigPaths from 'vite-tsconfig-paths';
+import type { App } from 'vinxi';
 
 const config = {
   appDirectory: 'src/app',
@@ -60,4 +61,20 @@ app.hooks.hook('app:dev:server:listener:created', ({ listener }) => {
   exec(`open ${listener.url}`);
 });
 
-export default app;
+function withGlobalMiddleware(app: App) {
+  return {
+    ...app,
+    config: {
+      ...app.config,
+      routers: app.config.routers.map((router) => ({
+        ...router,
+        middleware:
+          router.target !== 'server'
+            ? undefined
+            : join(config.appDirectory, 'global-middleware.ts'),
+      })),
+    },
+  };
+}
+
+export default withGlobalMiddleware(app);

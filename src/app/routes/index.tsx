@@ -154,7 +154,7 @@ function Index() {
       <div className="flex justify-between items-center m-6 px-4">
         <h1 className="text-4xl font-bold">Codenames</h1>
         <div className="flex gap-2">
-          <Button variant="ghost">New Game</Button>
+          {session.data && <Button variant="ghost">New Game</Button>}
           <UserMenu />
         </div>
       </div>

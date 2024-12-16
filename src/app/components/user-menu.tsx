@@ -54,7 +54,7 @@ export function UserMenu() {
         </DropdownMenuSub>
         <DropdownMenuSeparator />
         {session.data ? (
-          <DropdownMenuItem>Log out</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => authClient.signOut()}>Log out</DropdownMenuItem>
         ) : (
           <DropdownMenuItem asChild>
             <Link to="/login">Log in</Link>
