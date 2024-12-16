@@ -12,6 +12,7 @@ import { FieldInfo } from '~/components/ui/field-info';
 import { authClient } from '~/lib/auth-client';
 import { useToast } from '~/hooks/use-toast';
 import { LoaderIcon } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const Route = createFileRoute('/(auth)/login')({
   component: RouteComponent,
@@ -39,6 +40,7 @@ const LoginFormSchema = z.object({
 function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'form'>) {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const form = useForm({
     defaultValues: {
@@ -81,6 +83,7 @@ function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'form
           });
         }
       } else {
+        queryClient.refetchQueries({ queryKey: ['auth'] });
         await navigate({ to: '/' });
       }
     },

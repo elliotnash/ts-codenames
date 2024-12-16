@@ -7,8 +7,12 @@ import * as React from 'react';
 import { Toaster } from '~/components/ui/toaster';
 import type { RouterContext } from '~/router';
 import { publicEnv } from '@/env';
+import { useAuthOptions } from '~/hooks/use-auth';
 
 export const Route = createRootRouteWithContext<RouterContext>()({
+  beforeLoad: async ({ context: { queryClient } }) => {
+    await queryClient.prefetchQuery(useAuthOptions());
+  },
   head: () => ({
     meta: [
       { charSet: 'utf-8' },

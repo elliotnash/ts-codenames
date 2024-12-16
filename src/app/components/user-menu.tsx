@@ -16,10 +16,13 @@ import { useTheme } from '~/components/theme';
 import { CircleUser } from 'lucide-react';
 import { authClient } from '~/lib/auth-client';
 import { Link } from '@tanstack/react-router';
+import { useAuth } from '~/hooks/use-auth';
+import { useQueryClient } from '@tanstack/react-query';
 
 export function UserMenu() {
   const { value: theme, set: setTheme } = useTheme();
-  const session = authClient.useSession();
+  const auth = useAuth();
+  const queryClient = useQueryClient();
 
   return (
     <DropdownMenu>
@@ -32,7 +35,7 @@ export function UserMenu() {
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {session.data && <DropdownMenuItem>Settings</DropdownMenuItem>}
+        {auth.isAuthenticated && <DropdownMenuItem>Settings</DropdownMenuItem>}
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>Color Theme</DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
@@ -53,8 +56,16 @@ export function UserMenu() {
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSeparator />
-        {session.data ? (
-          <DropdownMenuItem onClick={() => authClient.signOut()}>Log out</DropdownMenuItem>
+        {auth.isAuthenticated ? (
+          <DropdownMenuItem
+            onClick={async () => {
+              await authClient.signOut();
+              // Refetch the auth query to update the auth state
+              queryClient.refetchQueries({ queryKey: ['auth'] });
+            }}
+          >
+            Log out
+          </DropdownMenuItem>
         ) : (
           <DropdownMenuItem asChild>
             <Link to="/login">Log in</Link>

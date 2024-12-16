@@ -15,6 +15,7 @@ import { GradientBG } from '~/components/background';
 import { authClient } from '~/lib/auth-client';
 import { CircleUserRound } from 'lucide-react';
 import { UserMenu } from '~/components/user-menu';
+import { useAuth } from '~/hooks/use-auth';
 
 export const Route = createFileRoute('/')({
   loader: async () => {
@@ -77,7 +78,8 @@ const getGameCategories = createServerFn().handler(async () => {
 });
 
 function Index() {
-  const session = authClient.useSession();
+  const auth = useAuth();
+
   const { words, categories } = Route.useLoaderData();
 
   const [revealedCards, setRevealedCards] = useState<Set<number>>(new Set());
@@ -154,7 +156,7 @@ function Index() {
       <div className="flex justify-between items-center m-6 px-4">
         <h1 className="text-4xl font-bold">Codenames</h1>
         <div className="flex gap-2">
-          {session.data && <Button variant="ghost">New Game</Button>}
+          {auth.isAuthenticated && <Button variant="ghost">New Game</Button>}
           <UserMenu />
         </div>
       </div>
