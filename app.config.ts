@@ -11,7 +11,7 @@ const config = {
 
 const app = defineConfig({
   server: {
-    preset: 'node-server',
+    preset: 'bun',
     experimental: {
       websocket: true,
     },

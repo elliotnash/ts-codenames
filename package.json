@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "vinxi dev --port 3000 --host",
     "build": "vinxi build",
-    "start": "vinxi start --port 3000",
+    "start": "bun run .output/server/index.mjs",
     "migrate": "bun run src/migrate.ts",
     "introspect": "kysely-codegen"
   },
