@@ -29,7 +29,7 @@ function RouteComponent() {
         </Button>
         <Separator orientation="vertical" className="h-8" />
         <Button asChild variant="outline">
-          <Link to="/login">Log In to Play</Link>
+          <Link to="/dashboard">Create a game</Link>
         </Button>
       </div>
     </main>

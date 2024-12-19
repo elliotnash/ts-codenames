@@ -1,5 +1,5 @@
 import { useForm } from '@tanstack/react-form';
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { z } from 'zod';
 import { GridBG } from '~/components/background';
@@ -12,9 +12,19 @@ import { LoaderIcon } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { useToast } from '~/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
+import { authSearchSchema } from '~/lib/schema';
+import { useAuthOptions } from '~/hooks/use-auth';
 
 export const Route = createFileRoute('/(auth)/register')({
   component: RouteComponent,
+  validateSearch: authSearchSchema,
+  beforeLoad: async ({ search, context: { queryClient } }) => {
+    // Redirect if already authenticated
+    const auth = await queryClient.ensureQueryData(useAuthOptions());
+    if (auth.isAuthenticated) {
+      throw redirect({ to: search.redirect });
+    }
+  },
 });
 
 function RouteComponent() {
@@ -31,7 +41,7 @@ function RouteComponent() {
   );
 }
 
-const RegisterFormSchema = z.object({
+const registerFormSchema = z.object({
   fullName: z.string().nonempty('Name is required'),
   email: z.string().email('Invalid email'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
@@ -51,7 +61,7 @@ function RegisterForm({ className, ...props }: React.ComponentPropsWithoutRef<'f
       confirmPassword: '',
     },
     validators: {
-      onChange: RegisterFormSchema,
+      onChange: registerFormSchema,
     },
     onSubmit: async ({ value }) => {
       const { data, error } = await authClient.signUp.email({

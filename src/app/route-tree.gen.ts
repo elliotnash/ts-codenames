@@ -12,6 +12,8 @@
 
 import { Route as rootRoute } from './routes/__root';
 import { Route as HowToPlayImport } from './routes/how-to-play';
+import { Route as DashboardImport } from './routes/dashboard';
+import { Route as CreateImport } from './routes/create';
 import { Route as IndexImport } from './routes/index';
 import { Route as GameIdImport } from './routes/game/$id';
 import { Route as authRegisterImport } from './routes/(auth)/register';
@@ -22,6 +24,18 @@ import { Route as authLoginImport } from './routes/(auth)/login';
 const HowToPlayRoute = HowToPlayImport.update({
   id: '/how-to-play',
   path: '/how-to-play',
+  getParentRoute: () => rootRoute,
+} as any);
+
+const DashboardRoute = DashboardImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRoute,
+} as any);
+
+const CreateRoute = CreateImport.update({
+  id: '/create',
+  path: '/create',
   getParentRoute: () => rootRoute,
 } as any);
 
@@ -60,6 +74,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport;
       parentRoute: typeof rootRoute;
     };
+    '/create': {
+      id: '/create';
+      path: '/create';
+      fullPath: '/create';
+      preLoaderRoute: typeof CreateImport;
+      parentRoute: typeof rootRoute;
+    };
+    '/dashboard': {
+      id: '/dashboard';
+      path: '/dashboard';
+      fullPath: '/dashboard';
+      preLoaderRoute: typeof DashboardImport;
+      parentRoute: typeof rootRoute;
+    };
     '/how-to-play': {
       id: '/how-to-play';
       path: '/how-to-play';
@@ -95,6 +123,8 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute;
+  '/create': typeof CreateRoute;
+  '/dashboard': typeof DashboardRoute;
   '/how-to-play': typeof HowToPlayRoute;
   '/login': typeof authLoginRoute;
   '/register': typeof authRegisterRoute;
@@ -103,6 +133,8 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute;
+  '/create': typeof CreateRoute;
+  '/dashboard': typeof DashboardRoute;
   '/how-to-play': typeof HowToPlayRoute;
   '/login': typeof authLoginRoute;
   '/register': typeof authRegisterRoute;
@@ -112,6 +144,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute;
   '/': typeof IndexRoute;
+  '/create': typeof CreateRoute;
+  '/dashboard': typeof DashboardRoute;
   '/how-to-play': typeof HowToPlayRoute;
   '/(auth)/login': typeof authLoginRoute;
   '/(auth)/register': typeof authRegisterRoute;
@@ -120,12 +154,28 @@ export interface FileRoutesById {
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: '/' | '/how-to-play' | '/login' | '/register' | '/game/$id';
+  fullPaths:
+    | '/'
+    | '/create'
+    | '/dashboard'
+    | '/how-to-play'
+    | '/login'
+    | '/register'
+    | '/game/$id';
   fileRoutesByTo: FileRoutesByTo;
-  to: '/' | '/how-to-play' | '/login' | '/register' | '/game/$id';
+  to:
+    | '/'
+    | '/create'
+    | '/dashboard'
+    | '/how-to-play'
+    | '/login'
+    | '/register'
+    | '/game/$id';
   id:
     | '__root__'
     | '/'
+    | '/create'
+    | '/dashboard'
     | '/how-to-play'
     | '/(auth)/login'
     | '/(auth)/register'
@@ -135,6 +185,8 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
+  CreateRoute: typeof CreateRoute;
+  DashboardRoute: typeof DashboardRoute;
   HowToPlayRoute: typeof HowToPlayRoute;
   authLoginRoute: typeof authLoginRoute;
   authRegisterRoute: typeof authRegisterRoute;
@@ -143,6 +195,8 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CreateRoute: CreateRoute,
+  DashboardRoute: DashboardRoute,
   HowToPlayRoute: HowToPlayRoute,
   authLoginRoute: authLoginRoute,
   authRegisterRoute: authRegisterRoute,
@@ -160,6 +214,8 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/create",
+        "/dashboard",
         "/how-to-play",
         "/(auth)/login",
         "/(auth)/register",
@@ -168,6 +224,12 @@ export const routeTree = rootRoute
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/create": {
+      "filePath": "create.tsx"
+    },
+    "/dashboard": {
+      "filePath": "dashboard.tsx"
     },
     "/how-to-play": {
       "filePath": "how-to-play.tsx"

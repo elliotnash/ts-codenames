@@ -18,8 +18,9 @@ import { authClient } from '~/lib/auth-client';
 import { Link } from '@tanstack/react-router';
 import { useAuth } from '~/hooks/use-auth';
 import { useQueryClient } from '@tanstack/react-query';
+import { cn } from '~/lib/utils';
 
-export function UserMenu() {
+export function UserMenu({ className }: { className?: string }) {
   const { value: theme, set: setTheme } = useTheme();
   const auth = useAuth();
   const queryClient = useQueryClient();
@@ -27,7 +28,7 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon" className="rounded-full">
+        <Button variant="outline" size="icon" className={cn('rounded-full', className)}>
           <CircleUser className="h-5 w-5" />
           <span className="sr-only">Toggle user menu</span>
         </Button>

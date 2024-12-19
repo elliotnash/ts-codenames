@@ -2,9 +2,9 @@ import { cn } from '~/lib/utils';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
-import { useForm, type FieldApi } from '@tanstack/react-form';
+import { useForm } from '@tanstack/react-form';
 
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router';
 import { GridBG } from '~/components/background';
 import { z } from 'zod';
 import { useState } from 'react';
@@ -13,9 +13,19 @@ import { authClient } from '~/lib/auth-client';
 import { useToast } from '~/hooks/use-toast';
 import { LoaderIcon } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useAuth, useAuthOptions } from '~/hooks/use-auth';
+import { authSearchSchema } from '~/lib/schema';
 
 export const Route = createFileRoute('/(auth)/login')({
   component: RouteComponent,
+  validateSearch: authSearchSchema,
+  beforeLoad: async ({ search, context: { queryClient } }) => {
+    // Redirect if already authenticated
+    const auth = await queryClient.ensureQueryData(useAuthOptions());
+    if (auth.isAuthenticated) {
+      throw redirect({ to: search.redirect });
+    }
+  },
 });
 
 function RouteComponent() {
@@ -32,7 +42,7 @@ function RouteComponent() {
   );
 }
 
-const LoginFormSchema = z.object({
+const loginFormSchema = z.object({
   email: z.string().email(),
   password: z.string().nonempty(),
 });
@@ -41,6 +51,7 @@ function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'form
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const searchParams = Route.useSearch();
 
   const form = useForm({
     defaultValues: {
@@ -48,7 +59,7 @@ function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'form
       password: '',
     },
     validators: {
-      onChange: LoginFormSchema,
+      onChange: loginFormSchema,
     },
     onSubmit: async ({ value }) => {
       const { data, error } = await authClient.signIn.email({
@@ -84,7 +95,7 @@ function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'form
         }
       } else {
         queryClient.refetchQueries({ queryKey: ['auth'] });
-        await navigate({ to: '/' });
+        await navigate({ to: searchParams.redirect });
       }
     },
   });

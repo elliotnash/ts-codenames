@@ -56,7 +56,7 @@ function RootDocument({ children }: React.PropsWithChildren) {
       <head>
         <Meta />
       </head>
-      <body>
+      <body className="antialiased">
         <ThemeProvider>
           {children}
           <Toaster />

@@ -2,12 +2,15 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { GridBG } from '~/components/background';
 import { Button } from '~/components/ui/button';
 import { Separator } from '~/components/ui/separator';
+import { useAuth } from '~/hooks/use-auth';
 
 export const Route = createFileRoute('/')({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const auth = useAuth();
+
   return (
     <main className="container mx-auto p-4 min-h-screen flex flex-col items-center justify-center">
       <GridBG />
@@ -21,7 +24,7 @@ function RouteComponent() {
 
       <div className="flex items-center space-x-4 mb-8">
         <Button asChild>
-          <Link to="/login">Log In</Link>
+          <Link to="/dashboard">Create a game</Link>
         </Button>
         <Separator orientation="vertical" className="h-8" />
         <Button asChild variant="outline">
@@ -29,7 +32,18 @@ function RouteComponent() {
         </Button>
       </div>
 
-      <p className="text-sm text-muted-foreground">Log in to create or join a game</p>
+      {!auth.isAuthenticated && (
+        <p className="text-sm text-muted-foreground">
+          <Link to="/login" className="underline transition-colors hover:text-foreground">
+            Log in
+          </Link>{' '}
+          or{' '}
+          <Link to="/register" className="underline transition-colors hover:text-foreground">
+            register
+          </Link>{' '}
+          to create a game
+        </p>
+      )}
     </main>
   );
 }
