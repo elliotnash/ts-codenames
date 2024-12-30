@@ -6,7 +6,7 @@ import * as fs from 'node:fs/promises';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { match } from 'ts-pattern';
 import { ServerEventSchema, type RevealCardEventSchema } from '~/socket-events';
-import { cn } from '~/lib/utils';
+import { cn, shuffleArray } from '~/lib/utils';
 import { Button } from '~/components/ui/button';
 import { Badge } from '~/components/ui/badge';
 import { Switch } from '~/components/ui/switch';
@@ -35,9 +35,9 @@ const getGameWords = createServerFn().handler(async () => {
       .map((word) => word.trim())
       .filter((word) => word.length > 0);
 
-    const shuffled = wordsArr.sort(() => 0.5 - Math.random());
+    shuffleArray(wordsArr);
 
-    words = shuffled.slice(0, 25);
+    words = wordsArr.slice(0, 25);
   }
   return words;
 });
@@ -49,7 +49,7 @@ let categories: Category[] | undefined;
 const getGameCategories = createServerFn().handler(async () => {
   if (!categories) {
     const gameWords = await getGameWords();
-    const shuffled = gameWords.slice().sort(() => 0.5 - Math.random());
+    const shuffled = shuffleArray(gameWords.slice());
 
     const death = shuffled[0]!;
     const teamA = shuffled.slice(1, 9);
