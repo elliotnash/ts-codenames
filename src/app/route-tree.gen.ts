@@ -15,9 +15,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as HowToPlayRouteImport } from './routes/how-to-play'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as authRegisterRouteImport } from './routes/(auth)/register'
-import { Route as ApiEventsRouteImport } from './routes/api/events'
-import { Route as ApiRevealRouteImport } from './routes/api/reveal'
-import { Route as GameIdRouteImport } from './routes/game/$id'
+import { Route as GameCodeRouteImport } from './routes/game/$code'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiRoomsCodeEventsRouteImport } from './routes/api/rooms/$code/events'
 
@@ -51,19 +49,9 @@ const authRegisterRoute = authRegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiEventsRoute = ApiEventsRouteImport.update({
-  id: '/api/events',
-  path: '/api/events',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiRevealRoute = ApiRevealRouteImport.update({
-  id: '/api/reveal',
-  path: '/api/reveal',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GameIdRoute = GameIdRouteImport.update({
-  id: '/game/$id',
-  path: '/game/$id',
+const GameCodeRoute = GameCodeRouteImport.update({
+  id: '/game/$code',
+  path: '/game/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -84,9 +72,7 @@ export interface FileRoutesByFullPath {
   '/how-to-play': typeof HowToPlayRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
-  '/api/events': typeof ApiEventsRoute
-  '/api/reveal': typeof ApiRevealRoute
-  '/game/$id': typeof GameIdRoute
+  '/game/$code': typeof GameCodeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rooms/$code/events': typeof ApiRoomsCodeEventsRoute
 }
@@ -97,9 +83,7 @@ export interface FileRoutesByTo {
   '/how-to-play': typeof HowToPlayRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
-  '/api/events': typeof ApiEventsRoute
-  '/api/reveal': typeof ApiRevealRoute
-  '/game/$id': typeof GameIdRoute
+  '/game/$code': typeof GameCodeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rooms/$code/events': typeof ApiRoomsCodeEventsRoute
 }
@@ -111,9 +95,7 @@ export interface FileRoutesById {
   '/how-to-play': typeof HowToPlayRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
-  '/api/events': typeof ApiEventsRoute
-  '/api/reveal': typeof ApiRevealRoute
-  '/game/$id': typeof GameIdRoute
+  '/game/$code': typeof GameCodeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rooms/$code/events': typeof ApiRoomsCodeEventsRoute
 }
@@ -126,9 +108,7 @@ export interface FileRouteTypes {
     | '/how-to-play'
     | '/login'
     | '/register'
-    | '/api/events'
-    | '/api/reveal'
-    | '/game/$id'
+    | '/game/$code'
     | '/api/auth/$'
     | '/api/rooms/$code/events'
   fileRoutesByTo: FileRoutesByTo
@@ -139,9 +119,7 @@ export interface FileRouteTypes {
     | '/how-to-play'
     | '/login'
     | '/register'
-    | '/api/events'
-    | '/api/reveal'
-    | '/game/$id'
+    | '/game/$code'
     | '/api/auth/$'
     | '/api/rooms/$code/events'
   id:
@@ -152,9 +130,7 @@ export interface FileRouteTypes {
     | '/how-to-play'
     | '/(auth)/login'
     | '/(auth)/register'
-    | '/api/events'
-    | '/api/reveal'
-    | '/game/$id'
+    | '/game/$code'
     | '/api/auth/$'
     | '/api/rooms/$code/events'
   fileRoutesById: FileRoutesById
@@ -166,9 +142,7 @@ export interface RootRouteChildren {
   HowToPlayRoute: typeof HowToPlayRoute
   authLoginRoute: typeof authLoginRoute
   authRegisterRoute: typeof authRegisterRoute
-  ApiEventsRoute: typeof ApiEventsRoute
-  ApiRevealRoute: typeof ApiRevealRoute
-  GameIdRoute: typeof GameIdRoute
+  GameCodeRoute: typeof GameCodeRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiRoomsCodeEventsRoute: typeof ApiRoomsCodeEventsRoute
 }
@@ -217,25 +191,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/events': {
-      id: '/api/events'
-      path: '/api/events'
-      fullPath: '/api/events'
-      preLoaderRoute: typeof ApiEventsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/reveal': {
-      id: '/api/reveal'
-      path: '/api/reveal'
-      fullPath: '/api/reveal'
-      preLoaderRoute: typeof ApiRevealRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/game/$id': {
-      id: '/game/$id'
-      path: '/game/$id'
-      fullPath: '/game/$id'
-      preLoaderRoute: typeof GameIdRouteImport
+    '/game/$code': {
+      id: '/game/$code'
+      path: '/game/$code'
+      fullPath: '/game/$code'
+      preLoaderRoute: typeof GameCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
@@ -262,9 +222,7 @@ const rootRouteChildren: RootRouteChildren = {
   HowToPlayRoute: HowToPlayRoute,
   authLoginRoute: authLoginRoute,
   authRegisterRoute: authRegisterRoute,
-  ApiEventsRoute: ApiEventsRoute,
-  ApiRevealRoute: ApiRevealRoute,
-  GameIdRoute: GameIdRoute,
+  GameCodeRoute: GameCodeRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiRoomsCodeEventsRoute: ApiRoomsCodeEventsRoute,
 }
