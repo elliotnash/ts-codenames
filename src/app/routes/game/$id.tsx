@@ -1,11 +1,11 @@
 import { createFileRoute, useLoaderData } from '@tanstack/react-router';
-import { createServerFn } from '@tanstack/start';
+import { createServerFn } from '@tanstack/react-start';
 import { cva } from 'class-variance-authority';
 import { Card, CardContent } from '~/components/ui/card';
 import * as fs from 'node:fs/promises';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { match } from 'ts-pattern';
-import { ServerEventSchema, type RevealCardEventSchema } from '~/socket-events';
+import { ServerEventSchema } from '~/socket-events';
 import { cn, shuffleArray } from '~/lib/utils';
 import { Button } from '~/components/ui/button';
 import { Badge } from '~/components/ui/badge';
@@ -82,44 +82,31 @@ function Index() {
 
   const [revealedCards, setRevealedCards] = useState<Set<number>>(new Set());
 
-  // Websocket connection for receiving card reveal updates and sending card reveals.
-  const connection = useRef<WebSocket | null>(null);
+  // Receive card reveal updates over Server-Sent Events.
   useEffect(() => {
-    const ssl = window.location.protocol === 'https:';
-    const socket = new WebSocket(`${ssl ? 'wss' : 'ws'}://${window.location.host}/_ws`);
-
-    // Connection opened
-    socket.addEventListener('open', (event) => {
-      socket.send('ping');
-    });
-
-    // Listen for messages and handle
-    socket.addEventListener('message', (event) => {
+    const source = new EventSource('/api/events');
+    source.addEventListener('message', (event) => {
       try {
-        const jsonMessage = JSON.parse(event.data);
-        const { data } = ServerEventSchema.safeParse(jsonMessage);
+        const { data } = ServerEventSchema.safeParse(JSON.parse(event.data));
         if (data) {
           match(data).with({ type: 'revealedCardsUpdate' }, (update) => {
-            console.log('Setting revealed cards');
             setRevealedCards(update.revealedCards);
           });
         }
       } catch (e) {
-        console.log("Couldn't parse websocket message:", event.data);
+        console.log("Couldn't parse SSE message:", event.data);
       }
     });
-
-    connection.current = socket;
-    return () => socket.close();
+    return () => source.close();
   }, []);
 
   function revealCard(index: number) {
     setRevealedCards((cards) => new Set([...cards, index]));
-    connection.current?.send(
-      JSON.stringify({ type: 'revealCard', card: index } satisfies Zod.infer<
-        typeof RevealCardEventSchema
-      >),
-    );
+    fetch('/api/reveal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'revealCard', card: index }),
+    });
   }
 
   const blueStart = useMemo(() => categories.filter((cat) => cat === 'blue').length, [categories]);
@@ -225,10 +212,10 @@ function GameCard({
   const baseStyle =
     'aspect-[4/3] flex items-center justify-center cursor-pointer hover:bg-accent transition-all';
   return (
-    <div className="perspective-1000 cursor-pointer">
+    <div className="perspective-[1000px] cursor-pointer">
       <div
         data-revealed={revealed}
-        className="relative transform-style-3d transition-transform duration-700 transform text-white data-[revealed=true]:rotate-y-180"
+        className="relative transform-3d transition-transform duration-700 text-white data-[revealed=true]:rotate-y-180"
       >
         <div className="backface-hidden w-full h-full inset-0 rotate-y-0">
           <Card
