@@ -1,7 +1,19 @@
 import { createFileRoute, Link, redirect, useRouter } from '@tanstack/react-router';
-import { Clipboard, ExternalLink, Link as LinkIcon, Lock, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import {
+  Clipboard,
+  Download,
+  ExternalLink,
+  Link as LinkIcon,
+  Lock,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Trash2,
+  Upload,
+} from 'lucide-react';
 import { useState } from 'react';
 import { GridBG } from '~/components/background';
+import { BucketFormDialog, BucketImportDialog, exportBucket } from '~/components/bucket-dialogs';
 import { RoomSettingsDialog } from '~/components/room-settings-dialog';
 import {
   AlertDialog,
@@ -20,14 +32,11 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '~/components/ui/card';
-import { Input } from '~/components/ui/input';
-import { Label } from '~/components/ui/label';
 import { UserMenu } from '~/components/user-menu';
-import { getBuckets } from '~/functions/buckets';
+import { deleteBucket, getBuckets } from '~/functions/buckets';
 import { deleteRoom, getUserRooms, newGame } from '~/functions/rooms';
 import { useAuthOptions } from '~/hooks/use-auth';
 import { useToast } from '~/hooks/use-toast';
@@ -79,6 +88,20 @@ function RouteComponent() {
       });
     } finally {
       setBusyRoom(null);
+    }
+  }
+
+  async function handleDeleteBucket(bucketId: string, name: string) {
+    try {
+      await deleteBucket({ data: { id: bucketId } });
+      await router.invalidate();
+      toast({ title: 'Bucket deleted', description: `${name} was deleted.` });
+    } catch (error) {
+      toast({
+        variant: 'destructiveOutline',
+        title: 'Could not delete bucket',
+        description: error instanceof Error ? error.message : 'Please try again later',
+      });
     }
   }
 
@@ -217,30 +240,89 @@ function RouteComponent() {
             </div>
           </section>
           <section>
-            <h2 className="text-xl font-semibold mb-4">Add New Bucket</h2>
-            <Card className="backdrop-blur-sm bg-card/25">
-              <CardHeader>
-                <CardTitle>Create a New Word Bucket</CardTitle>
-                <CardDescription>Add a new set of words for your Codenames games</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form>
-                  <div className="grid w-full items-center gap-4">
-                    <div className="flex flex-col space-y-1.5">
-                      <Label htmlFor="bucket-name">Bucket Name</Label>
-                      <Input id="bucket-name" placeholder="Enter bucket name" />
-                    </div>
-                    <div className="flex flex-col space-y-1.5">
-                      <Label htmlFor="bucket-words">Words (comma-separated)</Label>
-                      <Input id="bucket-words" placeholder="Enter words, separated by commas" />
-                    </div>
-                  </div>
-                </form>
-              </CardContent>
-              <CardFooter>
-                <Button>Create Bucket</Button>
-              </CardFooter>
-            </Card>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Word Buckets</h2>
+              <div className="flex gap-2">
+                <BucketImportDialog
+                  trigger={
+                    <Button variant="outline">
+                      <Upload className="h-4 w-4" /> Import
+                    </Button>
+                  }
+                />
+                <BucketFormDialog
+                  trigger={
+                    <Button>
+                      <Plus className="h-4 w-4" /> New Bucket
+                    </Button>
+                  }
+                />
+              </div>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {buckets.map((bucket) => (
+                <Card key={bucket.id} className="backdrop-blur-sm bg-card/25">
+                  <CardHeader>
+                    <CardTitle className="flex justify-between items-center text-xl">
+                      {bucket.name}
+                      {bucket.isSystem && <Badge variant="outline">System</Badge>}
+                    </CardTitle>
+                    <CardDescription>
+                      {bucket.words.length} words
+                      {bucket.description ? ` · ${bucket.description}` : ''}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex flex-wrap gap-2">
+                    {!bucket.isSystem && (
+                      <BucketFormDialog
+                        bucket={bucket}
+                        trigger={
+                          <Button variant="outline">
+                            <Pencil className="h-4 w-4" /> Edit
+                          </Button>
+                        }
+                      />
+                    )}
+                    <Button variant="outline" onClick={() => exportBucket(bucket)}>
+                      <Download className="h-4 w-4" /> Export
+                    </Button>
+                    {!bucket.isSystem && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            className="text-destructive hover:text-destructive group"
+                            variant="ghost"
+                            size="icon"
+                          >
+                            <Trash2 className="h-4 w-4 group-hover:brightness-[150%] transition-all" />
+                            <span className="sr-only">Delete bucket</span>
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete {bucket.name}?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Rooms using this bucket keep their current board, but new games will
+                              need enough words from their remaining buckets. This cannot be
+                              undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              onClick={() => handleDeleteBucket(bucket.id, bucket.name)}
+                            >
+                              Delete Bucket
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </section>
         </main>
       </div>
