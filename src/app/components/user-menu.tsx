@@ -36,7 +36,16 @@ export function UserMenu({ className }: { className?: string }) {
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {auth.isAuthenticated && <DropdownMenuItem>Settings</DropdownMenuItem>}
+        {auth.isAuthenticated && (
+          <>
+            <DropdownMenuItem asChild>
+              <Link to="/dashboard">Dashboard</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/account">Settings</Link>
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>Color Theme</DropdownMenuSubTrigger>
           <DropdownMenuSubContent>

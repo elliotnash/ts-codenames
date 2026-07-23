@@ -12,4 +12,12 @@ export const auth = betterAuth({
       maxAge: 5 * 60, // Cache duration in seconds
     },
   },
+  user: {
+    changeEmail: {
+      enabled: true,
+    },
+    deleteUser: {
+      enabled: true,
+    },
+  },
 });
