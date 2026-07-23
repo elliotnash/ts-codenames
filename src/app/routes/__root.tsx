@@ -1,8 +1,7 @@
 import { ThemeProvider } from '~/components/theme';
 import styles from '~/globals.css?url';
 import { createRootRouteWithContext } from '@tanstack/react-router';
-import { Outlet, ScrollRestoration } from '@tanstack/react-router';
-import { Meta, Scripts } from '@tanstack/start';
+import { HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import * as React from 'react';
 import { Toaster } from '~/components/ui/toaster';
 import type { RouterContext } from '~/router';
@@ -37,7 +36,7 @@ function RootDocument({ children }: React.PropsWithChildren) {
     publicEnv().mode === 'production'
       ? () => null
       : React.lazy(() =>
-          import('@tanstack/router-devtools').then((mod) => ({
+          import('@tanstack/react-router-devtools').then((mod) => ({
             default: mod.TanStackRouterDevtools,
           })),
         );
@@ -54,7 +53,7 @@ function RootDocument({ children }: React.PropsWithChildren) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <Meta />
+        <HeadContent />
       </head>
       <body className="antialiased">
         <ThemeProvider>
@@ -65,7 +64,6 @@ function RootDocument({ children }: React.PropsWithChildren) {
           <RouterDevtools />
           <QueryDevtools />
         </React.Suspense>
-        <ScrollRestoration />
         <Scripts />
       </body>
     </html>

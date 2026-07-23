@@ -98,7 +98,9 @@ function RouteComponent() {
                   <CardContent>
                     {/* <p>Status: {game.status}</p> */}
                     <Button asChild>
-                      <Link to={`/game/${game.id}`}>Join Game</Link>
+                      <Link to="/game/$id" params={{ id: `${game.id}` }}>
+                        Join Game
+                      </Link>
                     </Button>
                   </CardContent>
                   {/* <CardFooter>

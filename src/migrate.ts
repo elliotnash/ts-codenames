@@ -60,7 +60,7 @@ async function runMigration(migrationFile: string) {
 const schemaVersion = await getSchemaVersion();
 const migrationMap = await getMigrationMap();
 
-const maxMigration = migrationMap.keys().reduce(Math.max);
+const maxMigration = Math.max(...migrationMap.keys());
 
 // Run all new migrations
 for (let i = schemaVersion + 1; i <= maxMigration; i++) {

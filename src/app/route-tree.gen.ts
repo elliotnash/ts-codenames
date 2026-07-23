@@ -8,152 +8,108 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-// Import Routes
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as CreateRouteImport } from './routes/create'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as HowToPlayRouteImport } from './routes/how-to-play'
+import { Route as authLoginRouteImport } from './routes/(auth)/login'
+import { Route as authRegisterRouteImport } from './routes/(auth)/register'
+import { Route as ApiEventsRouteImport } from './routes/api/events'
+import { Route as ApiRevealRouteImport } from './routes/api/reveal'
+import { Route as GameIdRouteImport } from './routes/game/$id'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
-import { Route as rootRoute } from './routes/__root';
-import { Route as HowToPlayImport } from './routes/how-to-play';
-import { Route as DashboardImport } from './routes/dashboard';
-import { Route as CreateImport } from './routes/create';
-import { Route as IndexImport } from './routes/index';
-import { Route as GameIdImport } from './routes/game/$id';
-import { Route as authRegisterImport } from './routes/(auth)/register';
-import { Route as authLoginImport } from './routes/(auth)/login';
-
-// Create/Update Routes
-
-const HowToPlayRoute = HowToPlayImport.update({
-  id: '/how-to-play',
-  path: '/how-to-play',
-  getParentRoute: () => rootRoute,
-} as any);
-
-const DashboardRoute = DashboardImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRoute,
-} as any);
-
-const CreateRoute = CreateImport.update({
-  id: '/create',
-  path: '/create',
-  getParentRoute: () => rootRoute,
-} as any);
-
-const IndexRoute = IndexImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
-} as any);
-
-const GameIdRoute = GameIdImport.update({
-  id: '/game/$id',
-  path: '/game/$id',
-  getParentRoute: () => rootRoute,
-} as any);
-
-const authRegisterRoute = authRegisterImport.update({
-  id: '/(auth)/register',
-  path: '/register',
-  getParentRoute: () => rootRoute,
-} as any);
-
-const authLoginRoute = authLoginImport.update({
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreateRoute = CreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowToPlayRoute = HowToPlayRouteImport.update({
+  id: '/how-to-play',
+  path: '/how-to-play',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authLoginRoute = authLoginRouteImport.update({
   id: '/(auth)/login',
   path: '/login',
-  getParentRoute: () => rootRoute,
-} as any);
-
-// Populate the FileRoutesByPath interface
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/': {
-      id: '/';
-      path: '/';
-      fullPath: '/';
-      preLoaderRoute: typeof IndexImport;
-      parentRoute: typeof rootRoute;
-    };
-    '/create': {
-      id: '/create';
-      path: '/create';
-      fullPath: '/create';
-      preLoaderRoute: typeof CreateImport;
-      parentRoute: typeof rootRoute;
-    };
-    '/dashboard': {
-      id: '/dashboard';
-      path: '/dashboard';
-      fullPath: '/dashboard';
-      preLoaderRoute: typeof DashboardImport;
-      parentRoute: typeof rootRoute;
-    };
-    '/how-to-play': {
-      id: '/how-to-play';
-      path: '/how-to-play';
-      fullPath: '/how-to-play';
-      preLoaderRoute: typeof HowToPlayImport;
-      parentRoute: typeof rootRoute;
-    };
-    '/(auth)/login': {
-      id: '/(auth)/login';
-      path: '/login';
-      fullPath: '/login';
-      preLoaderRoute: typeof authLoginImport;
-      parentRoute: typeof rootRoute;
-    };
-    '/(auth)/register': {
-      id: '/(auth)/register';
-      path: '/register';
-      fullPath: '/register';
-      preLoaderRoute: typeof authRegisterImport;
-      parentRoute: typeof rootRoute;
-    };
-    '/game/$id': {
-      id: '/game/$id';
-      path: '/game/$id';
-      fullPath: '/game/$id';
-      preLoaderRoute: typeof GameIdImport;
-      parentRoute: typeof rootRoute;
-    };
-  }
-}
-
-// Create and export the route tree
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authRegisterRoute = authRegisterRouteImport.update({
+  id: '/(auth)/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEventsRoute = ApiEventsRouteImport.update({
+  id: '/api/events',
+  path: '/api/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRevealRoute = ApiRevealRouteImport.update({
+  id: '/api/reveal',
+  path: '/api/reveal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GameIdRoute = GameIdRouteImport.update({
+  id: '/game/$id',
+  path: '/game/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute;
-  '/create': typeof CreateRoute;
-  '/dashboard': typeof DashboardRoute;
-  '/how-to-play': typeof HowToPlayRoute;
-  '/login': typeof authLoginRoute;
-  '/register': typeof authRegisterRoute;
-  '/game/$id': typeof GameIdRoute;
+  '/': typeof IndexRoute
+  '/create': typeof CreateRoute
+  '/dashboard': typeof DashboardRoute
+  '/how-to-play': typeof HowToPlayRoute
+  '/login': typeof authLoginRoute
+  '/register': typeof authRegisterRoute
+  '/api/events': typeof ApiEventsRoute
+  '/api/reveal': typeof ApiRevealRoute
+  '/game/$id': typeof GameIdRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
-
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute;
-  '/create': typeof CreateRoute;
-  '/dashboard': typeof DashboardRoute;
-  '/how-to-play': typeof HowToPlayRoute;
-  '/login': typeof authLoginRoute;
-  '/register': typeof authRegisterRoute;
-  '/game/$id': typeof GameIdRoute;
+  '/': typeof IndexRoute
+  '/create': typeof CreateRoute
+  '/dashboard': typeof DashboardRoute
+  '/how-to-play': typeof HowToPlayRoute
+  '/login': typeof authLoginRoute
+  '/register': typeof authRegisterRoute
+  '/api/events': typeof ApiEventsRoute
+  '/api/reveal': typeof ApiRevealRoute
+  '/game/$id': typeof GameIdRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
-
 export interface FileRoutesById {
-  __root__: typeof rootRoute;
-  '/': typeof IndexRoute;
-  '/create': typeof CreateRoute;
-  '/dashboard': typeof DashboardRoute;
-  '/how-to-play': typeof HowToPlayRoute;
-  '/(auth)/login': typeof authLoginRoute;
-  '/(auth)/register': typeof authRegisterRoute;
-  '/game/$id': typeof GameIdRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/create': typeof CreateRoute
+  '/dashboard': typeof DashboardRoute
+  '/how-to-play': typeof HowToPlayRoute
+  '/(auth)/login': typeof authLoginRoute
+  '/(auth)/register': typeof authRegisterRoute
+  '/api/events': typeof ApiEventsRoute
+  '/api/reveal': typeof ApiRevealRoute
+  '/game/$id': typeof GameIdRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
-
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/create'
@@ -161,8 +117,11 @@ export interface FileRouteTypes {
     | '/how-to-play'
     | '/login'
     | '/register'
-    | '/game/$id';
-  fileRoutesByTo: FileRoutesByTo;
+    | '/api/events'
+    | '/api/reveal'
+    | '/game/$id'
+    | '/api/auth/$'
+  fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/create'
@@ -170,7 +129,10 @@ export interface FileRouteTypes {
     | '/how-to-play'
     | '/login'
     | '/register'
-    | '/game/$id';
+    | '/api/events'
+    | '/api/reveal'
+    | '/game/$id'
+    | '/api/auth/$'
   id:
     | '__root__'
     | '/'
@@ -179,18 +141,98 @@ export interface FileRouteTypes {
     | '/how-to-play'
     | '/(auth)/login'
     | '/(auth)/register'
-    | '/game/$id';
-  fileRoutesById: FileRoutesById;
+    | '/api/events'
+    | '/api/reveal'
+    | '/game/$id'
+    | '/api/auth/$'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  CreateRoute: typeof CreateRoute
+  DashboardRoute: typeof DashboardRoute
+  HowToPlayRoute: typeof HowToPlayRoute
+  authLoginRoute: typeof authLoginRoute
+  authRegisterRoute: typeof authRegisterRoute
+  ApiEventsRoute: typeof ApiEventsRoute
+  ApiRevealRoute: typeof ApiRevealRoute
+  GameIdRoute: typeof GameIdRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
-export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  CreateRoute: typeof CreateRoute;
-  DashboardRoute: typeof DashboardRoute;
-  HowToPlayRoute: typeof HowToPlayRoute;
-  authLoginRoute: typeof authLoginRoute;
-  authRegisterRoute: typeof authRegisterRoute;
-  GameIdRoute: typeof GameIdRoute;
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create': {
+      id: '/create'
+      path: '/create'
+      fullPath: '/create'
+      preLoaderRoute: typeof CreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-to-play': {
+      id: '/how-to-play'
+      path: '/how-to-play'
+      fullPath: '/how-to-play'
+      preLoaderRoute: typeof HowToPlayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/login': {
+      id: '/(auth)/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof authLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/register': {
+      id: '/(auth)/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof authRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/events': {
+      id: '/api/events'
+      path: '/api/events'
+      fullPath: '/api/events'
+      preLoaderRoute: typeof ApiEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/reveal': {
+      id: '/api/reveal'
+      path: '/api/reveal'
+      fullPath: '/api/reveal'
+      preLoaderRoute: typeof ApiRevealRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/game/$id': {
+      id: '/game/$id'
+      path: '/game/$id'
+      fullPath: '/game/$id'
+      preLoaderRoute: typeof GameIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -200,49 +242,20 @@ const rootRouteChildren: RootRouteChildren = {
   HowToPlayRoute: HowToPlayRoute,
   authLoginRoute: authLoginRoute,
   authRegisterRoute: authRegisterRoute,
+  ApiEventsRoute: ApiEventsRoute,
+  ApiRevealRoute: ApiRevealRoute,
   GameIdRoute: GameIdRoute,
-};
-
-export const routeTree = rootRoute
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
+}
+export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()
 
-/* ROUTE_MANIFEST_START
-{
-  "routes": {
-    "__root__": {
-      "filePath": "__root.tsx",
-      "children": [
-        "/",
-        "/create",
-        "/dashboard",
-        "/how-to-play",
-        "/(auth)/login",
-        "/(auth)/register",
-        "/game/$id"
-      ]
-    },
-    "/": {
-      "filePath": "index.tsx"
-    },
-    "/create": {
-      "filePath": "create.tsx"
-    },
-    "/dashboard": {
-      "filePath": "dashboard.tsx"
-    },
-    "/how-to-play": {
-      "filePath": "how-to-play.tsx"
-    },
-    "/(auth)/login": {
-      "filePath": "(auth)/login.tsx"
-    },
-    "/(auth)/register": {
-      "filePath": "(auth)/register.tsx"
-    },
-    "/game/$id": {
-      "filePath": "game/$id.tsx"
-    }
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
   }
 }
-ROUTE_MANIFEST_END */

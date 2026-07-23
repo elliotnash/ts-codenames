@@ -1,5 +1,5 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
-import { getHeaders } from 'vinxi/http';
+import { getRequestHeaders } from '@tanstack/react-start/server';
 import { serverOnly$ } from 'vite-env-only/macros';
 import { authClient } from '~/lib/auth-client';
 
@@ -9,7 +9,7 @@ export function useAuthOptions() {
     queryFn: async () => {
       const session = await authClient.getSession({
         fetchOptions: serverOnly$({
-          headers: getHeaders() as Record<string, string>,
+          headers: Object.fromEntries(getRequestHeaders()) as Record<string, string>,
         }),
       });
       return {

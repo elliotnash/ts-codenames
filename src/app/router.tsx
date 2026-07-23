@@ -15,7 +15,7 @@ export interface RouterContext {
   queryClient: QueryClient;
 }
 
-export function createRouter() {
+export function getRouter() {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -34,6 +34,7 @@ export function createRouter() {
     routeTree,
     context: routerContext,
     defaultPreload: 'intent',
+    scrollRestoration: true,
     // Wrap: ({ children }) => {
     //   return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
     // },
@@ -50,13 +51,13 @@ export function createRouter() {
 
 declare module '@tanstack/react-router' {
   interface Register {
-    router: ReturnType<typeof createRouter>;
+    router: ReturnType<typeof getRouter>;
   }
 }
 
 declare global {
   interface Window {
-    getRouter: () => ReturnType<typeof createRouter>;
+    getRouter: () => ReturnType<typeof getRouter>;
     getQueryClient: () => QueryClient;
   }
 }
