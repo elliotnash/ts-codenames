@@ -1,0 +1,18 @@
+{
+  "name": "Standard",
+  "description": "The default word list.",
+  "language": "en",
+  "author": "ts-codenames",
+  "words": [
+    "Arc", "Pitch", "Ward", "Bolt", "Cane", "Line", "Mask", "Grain", "Bark", "Track",
+    "Beam", "Wing", "Cove", "Forge", "Pulse", "Crest", "Shade", "Plume", "Tide", "Horn",
+    "Cage", "Flare", "Vault", "Stem", "Bridge", "Anchor", "Arrow", "Badge", "Blade", "Bloom",
+    "Brook", "Cliff", "Cloak", "Coil", "Comet", "Coral", "Crane", "Crown", "Dart", "Dawn",
+    "Delta", "Drift", "Echo", "Ember", "Fang", "Fern", "Flint", "Frost", "Gale", "Gear",
+    "Glacier", "Globe", "Grove", "Harbor", "Hatch", "Haven", "Helm", "Hollow", "Iris", "Ivory",
+    "Jewel", "Knot", "Lantern", "Ledge", "Loom", "Mantle", "Maple", "Marsh", "Mirror", "Moss",
+    "Needle", "Nest", "Oath", "Orbit", "Peak", "Pearl", "Pier", "Prism", "Quill", "Reef",
+    "Ridge", "Ripple", "Saddle", "Scale", "Shard", "Shell", "Signal", "Spark", "Sphere", "Spire",
+    "Summit", "Talon", "Thorn", "Torch", "Trail", "Vane", "Veil", "Vine", "Wharf", "Willow"
+  ]
+}
