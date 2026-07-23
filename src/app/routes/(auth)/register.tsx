@@ -22,7 +22,7 @@ export const Route = createFileRoute('/(auth)/register')({
     // Redirect if already authenticated
     const auth = await queryClient.ensureQueryData(useAuthOptions());
     if (auth.isAuthenticated) {
-      throw redirect({ to: search.redirect });
+      throw redirect({ href: search.redirect });
     }
   },
 });
@@ -52,6 +52,7 @@ function RegisterForm({ className, ...props }: React.ComponentPropsWithoutRef<'f
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const searchParams = Route.useSearch();
 
   const form = useForm({
     defaultValues: {
@@ -98,7 +99,7 @@ function RegisterForm({ className, ...props }: React.ComponentPropsWithoutRef<'f
         }
       } else {
         queryClient.refetchQueries({ queryKey: ['auth'] });
-        await navigate({ to: '/' });
+        await navigate({ href: searchParams.redirect });
       }
     },
   });

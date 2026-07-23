@@ -23,7 +23,7 @@ export const Route = createFileRoute('/(auth)/login')({
     // Redirect if already authenticated
     const auth = await queryClient.ensureQueryData(useAuthOptions());
     if (auth.isAuthenticated) {
-      throw redirect({ to: search.redirect });
+      throw redirect({ href: search.redirect });
     }
   },
 });
@@ -95,7 +95,7 @@ function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'form
         }
       } else {
         queryClient.refetchQueries({ queryKey: ['auth'] });
-        await navigate({ to: searchParams.redirect });
+        await navigate({ href: searchParams.redirect });
       }
     },
   });
