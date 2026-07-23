@@ -19,6 +19,7 @@ import { Route as ApiEventsRouteImport } from './routes/api/events'
 import { Route as ApiRevealRouteImport } from './routes/api/reveal'
 import { Route as GameIdRouteImport } from './routes/game/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiRoomsCodeEventsRouteImport } from './routes/api/rooms/$code/events'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -70,6 +71,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiRoomsCodeEventsRoute = ApiRoomsCodeEventsRouteImport.update({
+  id: '/api/rooms/$code/events',
+  path: '/api/rooms/$code/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/api/reveal': typeof ApiRevealRoute
   '/game/$id': typeof GameIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/rooms/$code/events': typeof ApiRoomsCodeEventsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/api/reveal': typeof ApiRevealRoute
   '/game/$id': typeof GameIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/rooms/$code/events': typeof ApiRoomsCodeEventsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -107,6 +115,7 @@ export interface FileRoutesById {
   '/api/reveal': typeof ApiRevealRoute
   '/game/$id': typeof GameIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/rooms/$code/events': typeof ApiRoomsCodeEventsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
     | '/api/reveal'
     | '/game/$id'
     | '/api/auth/$'
+    | '/api/rooms/$code/events'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -133,6 +143,7 @@ export interface FileRouteTypes {
     | '/api/reveal'
     | '/game/$id'
     | '/api/auth/$'
+    | '/api/rooms/$code/events'
   id:
     | '__root__'
     | '/'
@@ -145,6 +156,7 @@ export interface FileRouteTypes {
     | '/api/reveal'
     | '/game/$id'
     | '/api/auth/$'
+    | '/api/rooms/$code/events'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -158,6 +170,7 @@ export interface RootRouteChildren {
   ApiRevealRoute: typeof ApiRevealRoute
   GameIdRoute: typeof GameIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiRoomsCodeEventsRoute: typeof ApiRoomsCodeEventsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -232,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/rooms/$code/events': {
+      id: '/api/rooms/$code/events'
+      path: '/api/rooms/$code/events'
+      fullPath: '/api/rooms/$code/events'
+      preLoaderRoute: typeof ApiRoomsCodeEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -246,6 +266,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiRevealRoute: ApiRevealRoute,
   GameIdRoute: GameIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiRoomsCodeEventsRoute: ApiRoomsCodeEventsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
