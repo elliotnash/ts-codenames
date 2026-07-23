@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "start": "bun run dist/server/server.js",
+    "start": "bun run server.ts",
     "migrate": "bun run src/migrate.ts",
     "introspect": "kysely-codegen"
   },
