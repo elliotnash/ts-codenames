@@ -77,7 +77,7 @@ function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'form
               <>
                 If you have forgotten your password, you may{' '}
                 <Link
-                  to="/"
+                  to="/forgot-password"
                   className="underline underline-offset-4 transition-colors hover:text-foreground/80"
                   onClick={() => inUseToast.dismiss()}
                 >
@@ -157,7 +157,7 @@ function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'form
               <div className="flex items-center">
                 <Label htmlFor={field.name}>Password</Label>
                 <Link
-                  to="/"
+                  to="/forgot-password"
                   className="ml-auto text-sm underline-offset-4 hover:underline hover:text-foreground/80 transition-all"
                 >
                   Forgot your password?

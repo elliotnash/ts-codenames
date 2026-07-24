@@ -14,8 +14,10 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as CreateRouteImport } from './routes/create'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as HowToPlayRouteImport } from './routes/how-to-play'
+import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as authRegisterRouteImport } from './routes/(auth)/register'
+import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-password'
 import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
 import { Route as GameCodeRouteImport } from './routes/game/$code'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -46,6 +48,11 @@ const HowToPlayRoute = HowToPlayRouteImport.update({
   path: '/how-to-play',
   getParentRoute: () => rootRouteImport,
 } as any)
+const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
+  id: '/(auth)/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const authLoginRoute = authLoginRouteImport.update({
   id: '/(auth)/login',
   path: '/login',
@@ -54,6 +61,11 @@ const authLoginRoute = authLoginRouteImport.update({
 const authRegisterRoute = authRegisterRouteImport.update({
   id: '/(auth)/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authResetPasswordRoute = authResetPasswordRouteImport.update({
+  id: '/(auth)/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const authVerifyEmailRoute = authVerifyEmailRouteImport.update({
@@ -83,8 +95,10 @@ export interface FileRoutesByFullPath {
   '/create': typeof CreateRoute
   '/dashboard': typeof DashboardRoute
   '/how-to-play': typeof HowToPlayRoute
+  '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
+  '/reset-password': typeof authResetPasswordRoute
   '/verify-email': typeof authVerifyEmailRoute
   '/game/$code': typeof GameCodeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -96,8 +110,10 @@ export interface FileRoutesByTo {
   '/create': typeof CreateRoute
   '/dashboard': typeof DashboardRoute
   '/how-to-play': typeof HowToPlayRoute
+  '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
+  '/reset-password': typeof authResetPasswordRoute
   '/verify-email': typeof authVerifyEmailRoute
   '/game/$code': typeof GameCodeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -110,8 +126,10 @@ export interface FileRoutesById {
   '/create': typeof CreateRoute
   '/dashboard': typeof DashboardRoute
   '/how-to-play': typeof HowToPlayRoute
+  '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
+  '/(auth)/reset-password': typeof authResetPasswordRoute
   '/(auth)/verify-email': typeof authVerifyEmailRoute
   '/game/$code': typeof GameCodeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -125,8 +143,10 @@ export interface FileRouteTypes {
     | '/create'
     | '/dashboard'
     | '/how-to-play'
+    | '/forgot-password'
     | '/login'
     | '/register'
+    | '/reset-password'
     | '/verify-email'
     | '/game/$code'
     | '/api/auth/$'
@@ -138,8 +158,10 @@ export interface FileRouteTypes {
     | '/create'
     | '/dashboard'
     | '/how-to-play'
+    | '/forgot-password'
     | '/login'
     | '/register'
+    | '/reset-password'
     | '/verify-email'
     | '/game/$code'
     | '/api/auth/$'
@@ -151,8 +173,10 @@ export interface FileRouteTypes {
     | '/create'
     | '/dashboard'
     | '/how-to-play'
+    | '/(auth)/forgot-password'
     | '/(auth)/login'
     | '/(auth)/register'
+    | '/(auth)/reset-password'
     | '/(auth)/verify-email'
     | '/game/$code'
     | '/api/auth/$'
@@ -165,8 +189,10 @@ export interface RootRouteChildren {
   CreateRoute: typeof CreateRoute
   DashboardRoute: typeof DashboardRoute
   HowToPlayRoute: typeof HowToPlayRoute
+  authForgotPasswordRoute: typeof authForgotPasswordRoute
   authLoginRoute: typeof authLoginRoute
   authRegisterRoute: typeof authRegisterRoute
+  authResetPasswordRoute: typeof authResetPasswordRoute
   authVerifyEmailRoute: typeof authVerifyEmailRoute
   GameCodeRoute: typeof GameCodeRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -210,6 +236,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HowToPlayRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(auth)/forgot-password': {
+      id: '/(auth)/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof authForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(auth)/login': {
       id: '/(auth)/login'
       path: '/login'
@@ -222,6 +255,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof authRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/reset-password': {
+      id: '/(auth)/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof authResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(auth)/verify-email': {
@@ -261,8 +301,10 @@ const rootRouteChildren: RootRouteChildren = {
   CreateRoute: CreateRoute,
   DashboardRoute: DashboardRoute,
   HowToPlayRoute: HowToPlayRoute,
+  authForgotPasswordRoute: authForgotPasswordRoute,
   authLoginRoute: authLoginRoute,
   authRegisterRoute: authRegisterRoute,
+  authResetPasswordRoute: authResetPasswordRoute,
   authVerifyEmailRoute: authVerifyEmailRoute,
   GameCodeRoute: GameCodeRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
