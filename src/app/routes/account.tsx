@@ -24,6 +24,7 @@ import {
 } from '~/components/ui/card';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
+import { TwoFactorCard } from '~/components/two-factor-card';
 import { UserMenu } from '~/components/user-menu';
 import { useAuth, useAuthOptions } from '~/hooks/use-auth';
 import { useToast } from '~/hooks/use-toast';
@@ -56,6 +57,7 @@ function RouteComponent() {
           <ProfileCard initialName={auth.data?.user.name ?? ''} />
           <EmailCard initialEmail={auth.data?.user.email ?? ''} />
           <PasswordCard />
+          <TwoFactorCard enabled={auth.data?.user.twoFactorEnabled ?? false} />
           <DangerZoneCard />
         </main>
       </div>
@@ -135,7 +137,10 @@ function EmailCard({ initialEmail }: { initialEmail: string }) {
       });
     } else {
       await queryClient.refetchQueries({ queryKey: ['auth'] });
-      toast({ title: 'Email updated', description: 'Use your new email the next time you log in.' });
+      toast({
+        title: 'Confirmation email sent',
+        description: 'Approve the change from your current email, then verify the new address.',
+      });
     }
   }
 
@@ -143,7 +148,10 @@ function EmailCard({ initialEmail }: { initialEmail: string }) {
     <Card className="backdrop-blur-sm bg-card/25">
       <CardHeader>
         <CardTitle className="text-xl">Email</CardTitle>
-        <CardDescription>The address you use to log in.</CardDescription>
+        <CardDescription>
+          The address you use to log in. Changing it requires confirmation from your current
+          address.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="grid gap-4">
