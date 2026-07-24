@@ -44,6 +44,11 @@ export function UserMenu({ className }: { className?: string }) {
             <DropdownMenuItem asChild>
               <Link to="/account">Settings</Link>
             </DropdownMenuItem>
+            {auth.data?.user.role === 'admin' && (
+              <DropdownMenuItem asChild>
+                <Link to="/admin">Admin</Link>
+              </DropdownMenuItem>
+            )}
           </>
         )}
         <DropdownMenuSub>
