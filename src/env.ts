@@ -48,13 +48,13 @@ export const PrivateEnvSchema = z.object({
     }
     return val;
   }, z.coerce.boolean()),
-  // // packages/email
-  // SMTP_HOST: z.string(),
-  // SMTP_PORT: z.coerce.number(),
-  // SMTP_USER: z.string(),
-  // SMTP_PASS: z.string(),
-  // SMTP_SENDER: z.string(),
-  // SMTP_SENDER_NAME: z.string(),
+  // SMTP (Mailpit in dev — no auth, so user/pass are optional)
+  SMTP_HOST: z.string(),
+  SMTP_PORT: z.coerce.number(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_SENDER: z.string(),
+  SMTP_SENDER_NAME: z.string().default('Codenames'),
 });
 
 function mergedEnv() {
