@@ -1,8 +1,10 @@
 import { createAuthClient } from 'better-auth/react';
+import { adminClient, twoFactorClient } from 'better-auth/client/plugins';
 import { getRequestHeaders, setResponseHeader } from '@tanstack/react-start/server';
 import { serverOnly$ } from 'vite-env-only/macros';
 
 export const authClient = createAuthClient({
+  plugins: [twoFactorClient(), adminClient()],
   // baseURL: typeof window === 'undefined' ? privateEnv().betterAuthUrl : window.location.href, // the base url of your auth server,
   fetchOptions: {
     customFetchImpl: serverOnly$(async (input, init) => {
