@@ -66,6 +66,10 @@ function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'form
         email: value.email,
         password: value.password,
       });
+      if (data && 'twoFactorRedirect' in data) {
+        // the auth client's onTwoFactorRedirect hook navigates to /two-factor
+        return;
+      }
       if (error) {
         console.log('Log in error');
         console.log(error);
