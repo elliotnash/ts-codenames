@@ -86,6 +86,16 @@ function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'form
               </>
             ),
           });
+        } else if (error.code === 'EMAIL_NOT_VERIFIED') {
+          toast({
+            variant: 'destructiveOutline',
+            title: 'Email not verified',
+            description: 'Verify your email before logging in',
+          });
+          await navigate({
+            to: '/verify-email',
+            search: { email: value.email, redirect: searchParams.redirect },
+          });
         } else {
           toast({
             variant: 'destructiveOutline',

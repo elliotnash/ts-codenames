@@ -11,7 +11,6 @@ import { authClient } from '~/lib/auth-client';
 import { LoaderIcon } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { useToast } from '~/hooks/use-toast';
-import { useQueryClient } from '@tanstack/react-query';
 import { authSearchSchema } from '~/lib/schema';
 import { useAuthOptions } from '~/hooks/use-auth';
 
@@ -51,7 +50,6 @@ const registerFormSchema = z.object({
 function RegisterForm({ className, ...props }: React.ComponentPropsWithoutRef<'form'>) {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const searchParams = Route.useSearch();
 
   const form = useForm({
@@ -65,41 +63,27 @@ function RegisterForm({ className, ...props }: React.ComponentPropsWithoutRef<'f
       onChange: registerFormSchema,
     },
     onSubmit: async ({ value }) => {
-      const { data, error } = await authClient.signUp.email({
+      // Duplicate emails also return a generic success (enumeration protection),
+      // so there is no USER_ALREADY_EXISTS branch here.
+      const { error } = await authClient.signUp.email({
         email: value.email,
         password: value.password,
         name: value.fullName,
+        callbackURL: `/verify-email?redirect=${encodeURIComponent(searchParams.redirect)}`,
       });
       if (error) {
         console.log('Registration error');
         console.log(error);
-        if (error.code === 'USER_ALREADY_EXISTS') {
-          const inUseToast = toast({
-            variant: 'destructiveOutline',
-            title: 'Email already in use',
-            description: (
-              <>
-                Please try{' '}
-                <Link
-                  to="/login"
-                  className="underline underline-offset-4 transition-colors hover:text-foreground/80"
-                  onClick={() => inUseToast.dismiss()}
-                >
-                  signing in
-                </Link>
-              </>
-            ),
-          });
-        } else {
-          toast({
-            variant: 'destructiveOutline',
-            title: 'Unknown error signing up',
-            description: 'Please try again later',
-          });
-        }
+        toast({
+          variant: 'destructiveOutline',
+          title: 'Unknown error signing up',
+          description: 'Please try again later',
+        });
       } else {
-        queryClient.refetchQueries({ queryKey: ['auth'] });
-        await navigate({ href: searchParams.redirect });
+        await navigate({
+          to: '/verify-email',
+          search: { email: value.email, redirect: searchParams.redirect },
+        });
       }
     },
   });

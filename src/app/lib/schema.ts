@@ -8,3 +8,9 @@ export const authSearchSchema = z.object({
     .default('/')
     .catch('/'),
 });
+
+export const verifyEmailSearchSchema = authSearchSchema.extend({
+  email: z.string().optional(),
+  // TOKEN_EXPIRED | INVALID_TOKEN | ... appended by better-auth's verify-email redirect
+  error: z.string().optional(),
+});

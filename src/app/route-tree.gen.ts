@@ -16,6 +16,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as HowToPlayRouteImport } from './routes/how-to-play'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as authRegisterRouteImport } from './routes/(auth)/register'
+import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
 import { Route as GameCodeRouteImport } from './routes/game/$code'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiRoomsCodeEventsRouteImport } from './routes/api/rooms/$code/events'
@@ -55,6 +56,11 @@ const authRegisterRoute = authRegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const authVerifyEmailRoute = authVerifyEmailRouteImport.update({
+  id: '/(auth)/verify-email',
+  path: '/verify-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GameCodeRoute = GameCodeRouteImport.update({
   id: '/game/$code',
   path: '/game/$code',
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/how-to-play': typeof HowToPlayRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
+  '/verify-email': typeof authVerifyEmailRoute
   '/game/$code': typeof GameCodeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rooms/$code/events': typeof ApiRoomsCodeEventsRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/how-to-play': typeof HowToPlayRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
+  '/verify-email': typeof authVerifyEmailRoute
   '/game/$code': typeof GameCodeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rooms/$code/events': typeof ApiRoomsCodeEventsRoute
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/how-to-play': typeof HowToPlayRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
+  '/(auth)/verify-email': typeof authVerifyEmailRoute
   '/game/$code': typeof GameCodeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rooms/$code/events': typeof ApiRoomsCodeEventsRoute
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/how-to-play'
     | '/login'
     | '/register'
+    | '/verify-email'
     | '/game/$code'
     | '/api/auth/$'
     | '/api/rooms/$code/events'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/how-to-play'
     | '/login'
     | '/register'
+    | '/verify-email'
     | '/game/$code'
     | '/api/auth/$'
     | '/api/rooms/$code/events'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/how-to-play'
     | '/(auth)/login'
     | '/(auth)/register'
+    | '/(auth)/verify-email'
     | '/game/$code'
     | '/api/auth/$'
     | '/api/rooms/$code/events'
@@ -155,6 +167,7 @@ export interface RootRouteChildren {
   HowToPlayRoute: typeof HowToPlayRoute
   authLoginRoute: typeof authLoginRoute
   authRegisterRoute: typeof authRegisterRoute
+  authVerifyEmailRoute: typeof authVerifyEmailRoute
   GameCodeRoute: typeof GameCodeRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiRoomsCodeEventsRoute: typeof ApiRoomsCodeEventsRoute
@@ -211,6 +224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(auth)/verify-email': {
+      id: '/(auth)/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof authVerifyEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/game/$code': {
       id: '/game/$code'
       path: '/game/$code'
@@ -243,6 +263,7 @@ const rootRouteChildren: RootRouteChildren = {
   HowToPlayRoute: HowToPlayRoute,
   authLoginRoute: authLoginRoute,
   authRegisterRoute: authRegisterRoute,
+  authVerifyEmailRoute: authVerifyEmailRoute,
   GameCodeRoute: GameCodeRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiRoomsCodeEventsRoute: ApiRoomsCodeEventsRoute,
