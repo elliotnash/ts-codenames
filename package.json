@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
+    "typecheck": "tsc --noEmit",
     "start": "bun run server.ts",
     "migrate": "bun run src/migrate.ts",
     "introspect": "kysely-codegen"
@@ -61,7 +62,7 @@
     "kysely-codegen": "^0.20.0",
     "tailwindcss": "^4.3.3",
     "tailwindcss-animate": "^1.0.7",
-    "typescript": "^5.9.3",
+    "typescript": "^7.0.2",
     "vite": "^8.1.5",
     "vite-env-only": "^3.0.3"
   },

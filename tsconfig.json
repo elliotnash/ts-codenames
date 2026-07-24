@@ -18,10 +18,10 @@
     "target": "ES2022",
 
     "jsx": "react-jsx",
-    "baseUrl": ".",
+    "types": ["bun", "node"],
     "paths": {
-      "~/*": ["src/app/*"],
-      "@/*": ["src/*"]
+      "~/*": ["./src/app/*"],
+      "@/*": ["./src/*"]
     }
   }
 }
