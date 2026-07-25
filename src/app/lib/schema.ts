@@ -7,6 +7,8 @@ export const authSearchSchema = z.object({
     .regex(/^\/(?!\/)/)
     .default('/')
     .catch('/'),
+  // error codes appended by better-auth redirects (OAuth failures, verify-email)
+  error: z.string().optional(),
 });
 
 export const twoFactorSearchSchema = authSearchSchema.extend({
@@ -17,6 +19,4 @@ export const twoFactorSearchSchema = authSearchSchema.extend({
 
 export const verifyEmailSearchSchema = authSearchSchema.extend({
   email: z.string().optional(),
-  // TOKEN_EXPIRED | INVALID_TOKEN | ... appended by better-auth's verify-email redirect
-  error: z.string().optional(),
 });

@@ -1,3 +1,4 @@
+import { privateEnv } from '@/env';
 import { betterAuth } from 'better-auth';
 import { admin, twoFactor } from 'better-auth/plugins';
 import { changeEmailConfirmationTemplate } from '~/emails/change-email-confirmation';
@@ -37,6 +38,18 @@ export const auth = betterAuth({
     cookieCache: {
       enabled: true,
       maxAge: 5 * 60, // Cache duration in seconds
+    },
+  },
+  socialProviders: {
+    github: {
+      clientId: privateEnv().githubClientId,
+      clientSecret: privateEnv().githubClientSecret,
+    },
+  },
+  account: {
+    accountLinking: {
+      // GitHub sign-in with a matching (locally verified) email auto-links
+      trustedProviders: ['github'],
     },
   },
   user: {

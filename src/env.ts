@@ -48,6 +48,9 @@ export const PrivateEnvSchema = z.object({
     }
     return val;
   }, z.coerce.boolean()),
+  // GitHub OAuth (callback: {BETTER_AUTH_URL}/api/auth/callback/github)
+  GITHUB_CLIENT_ID: z.string(),
+  GITHUB_CLIENT_SECRET: z.string(),
   // SMTP (Mailpit in dev — no auth, so user/pass are optional)
   SMTP_HOST: z.string(),
   SMTP_PORT: z.coerce.number(),
