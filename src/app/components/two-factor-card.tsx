@@ -37,7 +37,13 @@ import { Label } from '~/components/ui/label';
 import { useToast } from '~/hooks/use-toast';
 import { authClient } from '~/lib/auth-client';
 
-export function TwoFactorCard({ enabled }: { enabled: boolean }) {
+export function TwoFactorCard({
+  enabled,
+  hasPassword,
+}: {
+  enabled: boolean;
+  hasPassword: boolean;
+}) {
   return (
     <Card className="backdrop-blur-sm bg-card/25">
       <CardHeader>
@@ -51,15 +57,22 @@ export function TwoFactorCard({ enabled }: { enabled: boolean }) {
             : 'Require a code from an authenticator app when logging in.'}
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-wrap gap-2">
-        {enabled ? (
-          <>
-            <RegenerateBackupCodesDialog />
-            <DisableDialog />
-          </>
-        ) : (
-          <EnableWizard />
+      <CardContent className="grid gap-2 justify-items-start">
+        {!hasPassword && (
+          <p className="text-sm text-muted-foreground">
+            Set a password above to manage two-factor authentication.
+          </p>
         )}
+        <div className="flex flex-wrap gap-2">
+          {enabled ? (
+            <>
+              <RegenerateBackupCodesDialog disabled={!hasPassword} />
+              <DisableDialog disabled={!hasPassword} />
+            </>
+          ) : (
+            <EnableWizard disabled={!hasPassword} />
+          )}
+        </div>
       </CardContent>
     </Card>
   );
@@ -106,7 +119,7 @@ function BackupCodesView({ codes }: { codes: string[] }) {
 
 type WizardStep = 'password' | 'verify' | 'backup';
 
-function EnableWizard() {
+function EnableWizard({ disabled }: { disabled: boolean }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -180,7 +193,7 @@ function EnableWizard() {
       }}
     >
       <DialogTrigger asChild>
-        <Button>Enable 2FA</Button>
+        <Button disabled={disabled}>Enable 2FA</Button>
       </DialogTrigger>
       <DialogContent>
         {step === 'password' && (
@@ -268,7 +281,7 @@ function EnableWizard() {
   );
 }
 
-function RegenerateBackupCodesDialog() {
+function RegenerateBackupCodesDialog({ disabled }: { disabled: boolean }) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState('');
@@ -304,7 +317,9 @@ function RegenerateBackupCodesDialog() {
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="outline">Regenerate Backup Codes</Button>
+        <Button variant="outline" disabled={disabled}>
+          Regenerate Backup Codes
+        </Button>
       </DialogTrigger>
       <DialogContent>
         {codes ? (
@@ -354,7 +369,7 @@ function RegenerateBackupCodesDialog() {
   );
 }
 
-function DisableDialog() {
+function DisableDialog({ disabled }: { disabled: boolean }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [password, setPassword] = useState('');
@@ -380,7 +395,9 @@ function DisableDialog() {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive">Disable 2FA</Button>
+        <Button variant="destructive" disabled={disabled}>
+          Disable 2FA
+        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

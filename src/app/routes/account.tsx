@@ -1,8 +1,10 @@
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { LoaderIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import { GridBG } from '~/components/background';
+import { LinkedAccountsCard } from '~/components/linked-accounts-card';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,11 +28,16 @@ import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import { TwoFactorCard } from '~/components/two-factor-card';
 import { UserMenu } from '~/components/user-menu';
+import { setPassword as setPasswordFn } from '~/functions/account';
 import { useAuth, useAuthOptions } from '~/hooks/use-auth';
 import { useToast } from '~/hooks/use-toast';
 import { authClient } from '~/lib/auth-client';
 
 export const Route = createFileRoute('/account')({
+  validateSearch: z.object({
+    // error codes appended by better-auth's link-account error redirect
+    error: z.string().optional(),
+  }),
   beforeLoad: async ({ context: { queryClient }, location }) => {
     const auth = await queryClient.ensureQueryData(useAuthOptions());
     if (!auth.isAuthenticated) {
@@ -40,8 +47,42 @@ export const Route = createFileRoute('/account')({
   component: RouteComponent,
 });
 
+function linkErrorMessage(code: string) {
+  switch (code) {
+    case "email_doesn't_match":
+      return 'That GitHub account uses a different email than this account.';
+    case 'account_already_linked_to_different_user':
+      return 'That GitHub account is already linked to another user.';
+    default:
+      return 'Please try again later';
+  }
+}
+
 function RouteComponent() {
   const auth = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const searchParams = Route.useSearch();
+
+  const accountsQuery = useQuery({
+    queryKey: ['accounts'],
+    queryFn: async () => (await authClient.listAccounts()).data ?? [],
+  });
+  const accounts = accountsQuery.data ?? [];
+  // While loading, assume a password exists so credential users don't see a set-password flash
+  const hasPassword =
+    accountsQuery.isPending || accounts.some((a) => a.providerId === 'credential');
+
+  // Link failures land back here as ?error=<code> (from errorCallbackURL)
+  useEffect(() => {
+    if (!searchParams.error) return;
+    toast({
+      variant: 'destructiveOutline',
+      title: 'Could not link GitHub',
+      description: linkErrorMessage(searchParams.error),
+    });
+    navigate({ to: '/account', search: {}, replace: true });
+  }, [searchParams.error, toast, navigate]);
 
   return (
     <main className="container min-h-screen w-full flex flex-col p-0">
@@ -56,9 +97,13 @@ function RouteComponent() {
         <main className="container px-4 py-8 max-w-2xl space-y-6">
           <ProfileCard initialName={auth.data?.user.name ?? ''} />
           <EmailCard initialEmail={auth.data?.user.email ?? ''} />
-          <PasswordCard />
-          <TwoFactorCard enabled={auth.data?.user.twoFactorEnabled ?? false} />
-          <DangerZoneCard />
+          <PasswordCard hasPassword={hasPassword} />
+          <TwoFactorCard
+            enabled={auth.data?.user.twoFactorEnabled ?? false}
+            hasPassword={hasPassword}
+          />
+          <LinkedAccountsCard accounts={accounts} loading={accountsQuery.isPending} />
+          <DangerZoneCard hasPassword={hasPassword} />
         </main>
       </div>
     </main>
@@ -179,8 +224,9 @@ function EmailCard({ initialEmail }: { initialEmail: string }) {
   );
 }
 
-function PasswordCard() {
+function PasswordCard({ hasPassword }: { hasPassword: boolean }) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -193,46 +239,70 @@ function PasswordCard() {
     e.preventDefault();
     if (mismatch || tooShort) return;
     setSaving(true);
-    const { error } = await authClient.changePassword({
-      currentPassword,
-      newPassword,
-      revokeOtherSessions: true,
-    });
-    setSaving(false);
-    if (error) {
-      toast({
-        variant: 'destructiveOutline',
-        title: 'Could not change password',
-        description:
-          error.code === 'INVALID_PASSWORD' ? 'Current password is incorrect.' : 'Please try again later',
+    if (hasPassword) {
+      const { error } = await authClient.changePassword({
+        currentPassword,
+        newPassword,
+        revokeOtherSessions: true,
       });
-    } else {
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      setSaving(false);
+      if (error) {
+        toast({
+          variant: 'destructiveOutline',
+          title: 'Could not change password',
+          description:
+            error.code === 'INVALID_PASSWORD' ? 'Current password is incorrect.' : 'Please try again later',
+        });
+        return;
+      }
       toast({ title: 'Password changed', description: 'Other sessions have been signed out.' });
+    } else {
+      try {
+        await setPasswordFn({ data: { newPassword } });
+      } catch {
+        setSaving(false);
+        toast({
+          variant: 'destructiveOutline',
+          title: 'Could not set password',
+          description: 'Please try again later',
+        });
+        return;
+      }
+      setSaving(false);
+      // Flips this card to change mode and unlocks 2FA / account deletion
+      await queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      toast({ title: 'Password set' });
     }
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
   }
 
   return (
     <Card className="backdrop-blur-sm bg-card/25">
       <CardHeader>
         <CardTitle className="text-xl">Password</CardTitle>
-        <CardDescription>Changing your password signs out your other sessions.</CardDescription>
+        <CardDescription>
+          {hasPassword
+            ? 'Changing your password signs out your other sessions.'
+            : 'You signed up with GitHub. Set a password to enable two-factor authentication and account deletion.'}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="current-password">Current Password</Label>
-            <Input
-              id="current-password"
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              autoComplete="current-password"
-              required
-            />
-          </div>
+          {hasPassword && (
+            <div className="grid gap-2">
+              <Label htmlFor="current-password">Current Password</Label>
+              <Input
+                id="current-password"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+              />
+            </div>
+          )}
           <div className="grid gap-2">
             <Label htmlFor="new-password">New Password</Label>
             <Input
@@ -266,10 +336,16 @@ function PasswordCard() {
           <Button
             type="submit"
             className="justify-self-start"
-            disabled={saving || currentPassword === '' || newPassword === '' || mismatch || tooShort}
+            disabled={
+              saving ||
+              (hasPassword && currentPassword === '') ||
+              newPassword === '' ||
+              mismatch ||
+              tooShort
+            }
           >
             {saving && <LoaderIcon className="animate-spin-slow" />}
-            Change Password
+            {hasPassword ? 'Change Password' : 'Set Password'}
           </Button>
         </form>
       </CardContent>
@@ -277,7 +353,7 @@ function PasswordCard() {
   );
 }
 
-function DangerZoneCard() {
+function DangerZoneCard({ hasPassword }: { hasPassword: boolean }) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -309,10 +385,17 @@ function DangerZoneCard() {
           Deleting your account also deletes all of your rooms and word buckets.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="grid gap-2 justify-items-start">
+        {!hasPassword && (
+          <p className="text-sm text-muted-foreground">
+            Set a password above to delete your account.
+          </p>
+        )}
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive">Delete Account</Button>
+            <Button variant="destructive" disabled={!hasPassword}>
+              Delete Account
+            </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
