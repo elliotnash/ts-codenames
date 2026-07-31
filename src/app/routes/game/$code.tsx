@@ -8,12 +8,13 @@ import { ClassicBoard } from '~/components/game/classic-board';
 import { ClassicRolePicker } from '~/components/game/classic-role-picker';
 import { DuetBoard } from '~/components/game/duet-board';
 import { DuetSidePicker } from '~/components/game/duet-side-picker';
+import { MotionProvider, m, riseItem } from '~/components/motion';
 import { RoomSettingsDialog } from '~/components/room-settings-dialog';
+import { SiteHeader } from '~/components/site-header';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
-import { UserMenu } from '~/components/user-menu';
 import { type Bucket, getBuckets } from '~/functions/buckets';
 import { getRoom, newGame, submitRoomPassword } from '~/functions/rooms';
 import { useCookieState } from '~/hooks/use-cookie-state';
@@ -64,11 +65,19 @@ function RoomNotFound() {
 
 function GamePage() {
   const { data, buckets } = Route.useLoaderData();
-  if (data.status === 'needsPassword') {
-    return <PasswordGate code={data.code} />;
-  }
   return (
-    <GameRoom key={data.room.code} code={data.room.code} initial={data.room} buckets={buckets} />
+    <MotionProvider>
+      {data.status === 'needsPassword' ? (
+        <PasswordGate code={data.code} />
+      ) : (
+        <GameRoom
+          key={data.room.code}
+          code={data.room.code}
+          initial={data.room}
+          buckets={buckets}
+        />
+      )}
+    </MotionProvider>
   );
 }
 
@@ -101,34 +110,41 @@ function PasswordGate({ code }: { code: string }) {
     <div>
       <GridBG />
       <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-        <Card className="w-full max-w-sm backdrop-blur-sm bg-card/25">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5" /> This room is locked
-            </CardTitle>
-            <CardDescription>
-              Enter the password to join <span className="font-mono">{code}</span>
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="room-password">Password</Label>
-                <Input
-                  id="room-password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={submitting}>
-                {submitting && <LoaderIcon className="animate-spin-slow" />}
-                Enter Room
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+        <m.div variants={riseItem} initial="hidden" animate="show" className="w-full max-w-sm">
+          <Card className="backdrop-blur-sm bg-card/25">
+            <CardHeader>
+              <p className="font-mono text-xs uppercase tracking-widest text-primary">
+                {'// Restricted'}
+              </p>
+              <CardTitle className="flex items-center gap-2 font-display text-2xl uppercase tracking-wide">
+                <Lock className="h-5 w-5" /> This room is locked
+              </CardTitle>
+              <CardDescription>
+                Enter the password to join <span className="font-mono">{code}</span>
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="room-password" className="block pb-1">
+                    Password
+                  </Label>
+                  <Input
+                    id="room-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={submitting}>
+                  {submitting && <LoaderIcon className="animate-spin-slow" />}
+                  Enter Room
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </m.div>
       </div>
     </div>
   );
@@ -221,31 +237,30 @@ function GameRoom({
   return (
     <div className="flex min-h-screen w-full flex-col">
       <GradientBG />
-      <div className="flex justify-between items-center m-6 px-4">
-        <div className="flex items-baseline gap-3">
-          <h1 className="text-4xl font-bold">Codenames</h1>
-          <span className="text-muted-foreground font-mono hidden sm:inline">{code}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" onClick={handleNewGame} disabled={dealing}>
-            {dealing ? <LoaderIcon className="animate-spin-slow" /> : <RefreshCw />}
-            New Game
-          </Button>
-          {initial.isOwner && buckets && (
-            <RoomSettingsDialog
-              room={{
-                id: initial.id,
-                code,
-                hasPassword: initial.hasPassword,
-                mode: state.mode,
-                buckets: initial.bucketIds.map((id) => ({ id })),
-              }}
-              buckets={buckets}
-            />
-          )}
-          <UserMenu />
-        </div>
-      </div>
+      <SiteHeader
+        sticky
+        code={code}
+        actions={
+          <>
+            <Button variant="ghost" size="sm" onClick={handleNewGame} disabled={dealing}>
+              {dealing ? <LoaderIcon className="animate-spin-slow" /> : <RefreshCw />}
+              <span className="hidden sm:inline">New Game</span>
+            </Button>
+            {initial.isOwner && buckets && (
+              <RoomSettingsDialog
+                room={{
+                  id: initial.id,
+                  code,
+                  hasPassword: initial.hasPassword,
+                  mode: state.mode,
+                  buckets: initial.bucketIds.map((id) => ({ id })),
+                }}
+                buckets={buckets}
+              />
+            )}
+          </>
+        }
+      />
       {match(state)
         .with({ mode: 'classic' }, (classic) =>
           role === null ? (
