@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { KeyRoundIcon, LoaderIcon } from 'lucide-react';
 import { useState } from 'react';
+import { GithubIcon } from '~/components/github-icon';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,14 +14,7 @@ import {
   AlertDialogTrigger,
 } from '~/components/ui/alert-dialog';
 import { Button } from '~/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card';
-import { GithubIcon } from '~/components/github-icon';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { useToast } from '~/hooks/use-toast';
 import { authClient } from '~/lib/auth-client';
 
@@ -37,7 +31,9 @@ export function LinkedAccountsCard({
   return (
     <Card className="backdrop-blur-sm bg-card/25">
       <CardHeader>
-        <CardTitle className="text-xl">Linked Accounts</CardTitle>
+        <CardTitle className="text-xl font-display font-bold uppercase tracking-wide">
+          Linked Accounts
+        </CardTitle>
         <CardDescription>Sign-in methods connected to your account.</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
@@ -135,7 +131,11 @@ function UnlinkGithubDialog({ lastMethod }: { lastMethod: boolean }) {
 
   if (lastMethod) {
     return (
-      <Button variant="outline" disabled title="Set a password first — this is your only sign-in method">
+      <Button
+        variant="outline"
+        disabled
+        title="Set a password first — this is your only sign-in method"
+      >
         Unlink
       </Button>
     );

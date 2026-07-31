@@ -15,13 +15,7 @@ import {
 } from '~/components/ui/alert-dialog';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -48,7 +42,9 @@ export function TwoFactorCard({
     <Card className="backdrop-blur-sm bg-card/25">
       <CardHeader>
         <div className="flex items-center gap-2">
-          <CardTitle className="text-xl">Two-Factor Authentication</CardTitle>
+          <CardTitle className="text-xl font-display font-bold uppercase tracking-wide">
+            Two-Factor Authentication
+          </CardTitle>
           {enabled && <Badge>Enabled</Badge>}
         </div>
         <CardDescription>
@@ -204,7 +200,9 @@ function EnableWizard({ disabled }: { disabled: boolean }) {
             </DialogHeader>
             <form onSubmit={handleEnable} className="grid gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="enable-2fa-password">Password</Label>
+                <Label htmlFor="enable-2fa-password" className="block pb-1">
+                  Password
+                </Label>
                 <Input
                   id="enable-2fa-password"
                   type="password"
@@ -237,9 +235,7 @@ function EnableWizard({ disabled }: { disabled: boolean }) {
                 <QRCodeSVG value={totpUri} size={168} />
               </div>
               <div className="grid gap-1 text-center">
-                <span className="text-xs text-muted-foreground">
-                  Or enter this key manually:
-                </span>
+                <span className="text-xs text-muted-foreground">Or enter this key manually:</span>
                 <code className="rounded bg-muted px-2 py-1 font-mono text-xs break-all">
                   {secret}
                 </code>
@@ -345,7 +341,9 @@ function RegenerateBackupCodesDialog({ disabled }: { disabled: boolean }) {
             </DialogHeader>
             <form onSubmit={handleRegenerate} className="grid gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="regen-codes-password">Password</Label>
+                <Label htmlFor="regen-codes-password" className="block pb-1">
+                  Password
+                </Label>
                 <Input
                   id="regen-codes-password"
                   type="password"
@@ -408,7 +406,9 @@ function DisableDialog({ disabled }: { disabled: boolean }) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="grid gap-2">
-          <Label htmlFor="disable-2fa-password">Password</Label>
+          <Label htmlFor="disable-2fa-password" className="block pb-1">
+            Password
+          </Label>
           <Input
             id="disable-2fa-password"
             type="password"

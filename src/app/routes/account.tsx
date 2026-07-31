@@ -5,6 +5,10 @@ import { useEffect, useState } from 'react';
 import { z } from 'zod';
 import { GridBG } from '~/components/background';
 import { LinkedAccountsCard } from '~/components/linked-accounts-card';
+import { MotionProvider, m, riseItem, staggerParent } from '~/components/motion';
+import { PageHeading } from '~/components/page-heading';
+import { SiteHeader } from '~/components/site-header';
+import { TwoFactorCard } from '~/components/two-factor-card';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,21 +21,14 @@ import {
   AlertDialogTrigger,
 } from '~/components/ui/alert-dialog';
 import { Button } from '~/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
-import { TwoFactorCard } from '~/components/two-factor-card';
-import { UserMenu } from '~/components/user-menu';
 import { setPassword as setPasswordFn } from '~/functions/account';
 import { useAuth, useAuthOptions } from '~/hooks/use-auth';
 import { useToast } from '~/hooks/use-toast';
 import { authClient } from '~/lib/auth-client';
+import { cn } from '~/lib/utils';
 
 export const Route = createFileRoute('/account')({
   validateSearch: z.object({
@@ -44,8 +41,11 @@ export const Route = createFileRoute('/account')({
       throw redirect({ to: '/login', search: { redirect: location.href } });
     }
   },
+  head: () => ({ meta: [{ title: 'Account — Codenames' }] }),
   component: RouteComponent,
 });
+
+const cardTitleStyle = 'text-xl font-display font-bold uppercase tracking-wide';
 
 function linkErrorMessage(code: string) {
   switch (code) {
@@ -85,28 +85,38 @@ function RouteComponent() {
   }, [searchParams.error, toast, navigate]);
 
   return (
-    <main className="container min-h-screen w-full flex flex-col p-0">
-      <GridBG />
-      <div className="min-h-screen">
-        <header className="sticky top-0 z-40 w-full border-b backdrop-blur-md">
-          <div className="container flex h-16 items-center justify-between px-4">
-            <h1 className="text-2xl font-bold">Account Settings</h1>
-            <UserMenu className="bg-card/25" />
-          </div>
-        </header>
-        <main className="container px-4 py-8 max-w-2xl space-y-6">
-          <ProfileCard initialName={auth.data?.user.name ?? ''} />
-          <EmailCard initialEmail={auth.data?.user.email ?? ''} />
-          <PasswordCard hasPassword={hasPassword} />
-          <TwoFactorCard
-            enabled={auth.data?.user.twoFactorEnabled ?? false}
-            hasPassword={hasPassword}
-          />
-          <LinkedAccountsCard accounts={accounts} loading={accountsQuery.isPending} />
-          <DangerZoneCard hasPassword={hasPassword} />
+    <MotionProvider>
+      <div className="min-h-screen flex flex-col">
+        <GridBG />
+        <SiteHeader sticky />
+        <main className="container mx-auto w-full px-4 py-8 max-w-2xl">
+          <m.div variants={staggerParent} initial="hidden" animate="show" className="space-y-6">
+            <PageHeading eyebrow="// Personnel file" title="Account" />
+            <m.div variants={riseItem}>
+              <ProfileCard initialName={auth.data?.user.name ?? ''} />
+            </m.div>
+            <m.div variants={riseItem}>
+              <EmailCard initialEmail={auth.data?.user.email ?? ''} />
+            </m.div>
+            <m.div variants={riseItem}>
+              <PasswordCard hasPassword={hasPassword} />
+            </m.div>
+            <m.div variants={riseItem}>
+              <TwoFactorCard
+                enabled={auth.data?.user.twoFactorEnabled ?? false}
+                hasPassword={hasPassword}
+              />
+            </m.div>
+            <m.div variants={riseItem}>
+              <LinkedAccountsCard accounts={accounts} loading={accountsQuery.isPending} />
+            </m.div>
+            <m.div variants={riseItem}>
+              <DangerZoneCard hasPassword={hasPassword} />
+            </m.div>
+          </m.div>
         </main>
       </div>
-    </main>
+    </MotionProvider>
   );
 }
 
@@ -136,13 +146,15 @@ function ProfileCard({ initialName }: { initialName: string }) {
   return (
     <Card className="backdrop-blur-sm bg-card/25">
       <CardHeader>
-        <CardTitle className="text-xl">Profile</CardTitle>
+        <CardTitle className={cardTitleStyle}>Profile</CardTitle>
         <CardDescription>Your display name.</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="account-name">Full Name</Label>
+            <Label htmlFor="account-name" className="block pb-1">
+              Full Name
+            </Label>
             <Input
               id="account-name"
               value={name}
@@ -150,7 +162,11 @@ function ProfileCard({ initialName }: { initialName: string }) {
               required
             />
           </div>
-          <Button type="submit" className="justify-self-start" disabled={saving || name.trim() === ''}>
+          <Button
+            type="submit"
+            className="justify-self-start"
+            disabled={saving || name.trim() === ''}
+          >
             {saving && <LoaderIcon className="animate-spin-slow" />}
             Save Name
           </Button>
@@ -192,7 +208,7 @@ function EmailCard({ initialEmail }: { initialEmail: string }) {
   return (
     <Card className="backdrop-blur-sm bg-card/25">
       <CardHeader>
-        <CardTitle className="text-xl">Email</CardTitle>
+        <CardTitle className={cardTitleStyle}>Email</CardTitle>
         <CardDescription>
           The address you use to log in. Changing it requires confirmation from your current
           address.
@@ -201,7 +217,9 @@ function EmailCard({ initialEmail }: { initialEmail: string }) {
       <CardContent>
         <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="account-email">Email</Label>
+            <Label htmlFor="account-email" className="block pb-1">
+              Email
+            </Label>
             <Input
               id="account-email"
               type="email"
@@ -251,7 +269,9 @@ function PasswordCard({ hasPassword }: { hasPassword: boolean }) {
           variant: 'destructiveOutline',
           title: 'Could not change password',
           description:
-            error.code === 'INVALID_PASSWORD' ? 'Current password is incorrect.' : 'Please try again later',
+            error.code === 'INVALID_PASSWORD'
+              ? 'Current password is incorrect.'
+              : 'Please try again later',
         });
         return;
       }
@@ -281,7 +301,7 @@ function PasswordCard({ hasPassword }: { hasPassword: boolean }) {
   return (
     <Card className="backdrop-blur-sm bg-card/25">
       <CardHeader>
-        <CardTitle className="text-xl">Password</CardTitle>
+        <CardTitle className={cardTitleStyle}>Password</CardTitle>
         <CardDescription>
           {hasPassword
             ? 'Changing your password signs out your other sessions.'
@@ -292,7 +312,9 @@ function PasswordCard({ hasPassword }: { hasPassword: boolean }) {
         <form onSubmit={handleSubmit} className="grid gap-4">
           {hasPassword && (
             <div className="grid gap-2">
-              <Label htmlFor="current-password">Current Password</Label>
+              <Label htmlFor="current-password" className="block pb-1">
+                Current Password
+              </Label>
               <Input
                 id="current-password"
                 type="password"
@@ -304,7 +326,9 @@ function PasswordCard({ hasPassword }: { hasPassword: boolean }) {
             </div>
           )}
           <div className="grid gap-2">
-            <Label htmlFor="new-password">New Password</Label>
+            <Label htmlFor="new-password" className="block pb-1">
+              New Password
+            </Label>
             <Input
               id="new-password"
               type="password"
@@ -320,7 +344,9 @@ function PasswordCard({ hasPassword }: { hasPassword: boolean }) {
             )}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="confirm-password">Confirm New Password</Label>
+            <Label htmlFor="confirm-password" className="block pb-1">
+              Confirm New Password
+            </Label>
             <Input
               id="confirm-password"
               type="password"
@@ -380,7 +406,7 @@ function DangerZoneCard({ hasPassword }: { hasPassword: boolean }) {
   return (
     <Card className="backdrop-blur-sm bg-card/25 border-destructive/50">
       <CardHeader>
-        <CardTitle className="text-xl text-destructive">Danger Zone</CardTitle>
+        <CardTitle className={cn(cardTitleStyle, 'text-destructive')}>Danger Zone</CardTitle>
         <CardDescription>
           Deleting your account also deletes all of your rooms and word buckets.
         </CardDescription>
@@ -406,7 +432,9 @@ function DangerZoneCard({ hasPassword }: { hasPassword: boolean }) {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="grid gap-2">
-              <Label htmlFor="delete-password">Password</Label>
+              <Label htmlFor="delete-password" className="block pb-1">
+                Password
+              </Label>
               <Input
                 id="delete-password"
                 type="password"
