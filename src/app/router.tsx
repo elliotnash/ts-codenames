@@ -1,6 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
 import { createRouter as createTanStackRouter } from '@tanstack/react-router';
 import { routerWithQueryClient } from '@tanstack/react-router-with-query';
+import { NotFoundPage } from '~/components/not-found';
 import { routeTree } from './route-tree.gen';
 // import { posthog } from 'posthog-js';
 // import { PostHogProvider } from 'posthog-js/react';
@@ -34,6 +35,7 @@ export function getRouter() {
     routeTree,
     context: routerContext,
     defaultPreload: 'intent',
+    defaultNotFoundComponent: NotFoundPage,
     scrollRestoration: true,
     // Wrap: ({ children }) => {
     //   return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
