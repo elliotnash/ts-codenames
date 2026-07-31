@@ -20,7 +20,14 @@ import { useAuth } from '~/hooks/use-auth';
 import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '~/lib/utils';
 
-export function UserMenu({ className }: { className?: string }) {
+export function UserMenu({
+  className,
+  dashboardMobileOnly = false,
+}: {
+  className?: string;
+  /** Hide the Dashboard item on sm+ — for headers whose nav already links there. */
+  dashboardMobileOnly?: boolean;
+}) {
   const { value: theme, set: setTheme } = useTheme();
   const auth = useAuth();
   const queryClient = useQueryClient();
@@ -38,7 +45,7 @@ export function UserMenu({ className }: { className?: string }) {
         <DropdownMenuSeparator />
         {auth.isAuthenticated && (
           <>
-            <DropdownMenuItem asChild>
+            <DropdownMenuItem asChild className={cn(dashboardMobileOnly && 'sm:hidden')}>
               <Link to="/dashboard">Dashboard</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>

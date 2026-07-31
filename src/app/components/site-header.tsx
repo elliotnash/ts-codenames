@@ -58,7 +58,7 @@ export function SiteHeader({
               </Button>
             </>
           )}
-          <UserMenu />
+          <UserMenu dashboardMobileOnly={!actions} />
         </nav>
       </div>
     </header>
