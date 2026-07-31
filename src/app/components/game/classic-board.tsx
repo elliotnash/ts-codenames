@@ -66,7 +66,7 @@ export function ClassicBoard({
   return (
     <div className="grow flex justify-center flex-col m-auto w-full px-6 max-w-4xl max-h-full">
       <div className="flex justify-between w-full mb-6 px-4">
-        <div className="flex space-x-4">
+        <div className="flex items-center space-x-4">
           {state.startingTeam === 'red' ? scoreBadges : scoreBadges.reverse()}
         </div>
         <div className="flex items-center gap-2">
