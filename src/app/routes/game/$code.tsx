@@ -7,11 +7,13 @@ import { ClassicBoard } from '~/components/game/classic-board';
 import { ClassicRolePicker } from '~/components/game/classic-role-picker';
 import { DuetBoard } from '~/components/game/duet-board';
 import { DuetSidePicker } from '~/components/game/duet-side-picker';
+import { RoomSettingsDialog } from '~/components/room-settings-dialog';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import { UserMenu } from '~/components/user-menu';
+import { type Bucket, getBuckets } from '~/functions/buckets';
 import { getRoom, newGame, submitRoomPassword } from '~/functions/rooms';
 import { useCookieState } from '~/hooks/use-cookie-state';
 import { useRoomStream } from '~/hooks/use-room-stream';
@@ -24,7 +26,12 @@ import {
 } from '~/lib/room-view-cookies';
 
 export const Route = createFileRoute('/game/$code')({
-  loader: ({ params }) => getRoom({ data: { code: params.code } }),
+  loader: async ({ params }) => {
+    const data = await getRoom({ data: { code: params.code } });
+    // Owners get the room-settings dialog, which needs the bucket list.
+    const buckets = data.status === 'ok' && data.room.isOwner ? await getBuckets() : null;
+    return { data, buckets };
+  },
   component: GamePage,
   notFoundComponent: () => (
     <MessageCard title="Room not found" description="There is no room with this code.">
@@ -36,11 +43,13 @@ export const Route = createFileRoute('/game/$code')({
 });
 
 function GamePage() {
-  const data = Route.useLoaderData();
+  const { data, buckets } = Route.useLoaderData();
   if (data.status === 'needsPassword') {
     return <PasswordGate code={data.code} />;
   }
-  return <GameRoom key={data.room.code} code={data.room.code} initial={data.room} />;
+  return (
+    <GameRoom key={data.room.code} code={data.room.code} initial={data.room} buckets={buckets} />
+  );
 }
 
 function MessageCard({
@@ -133,9 +142,19 @@ function PasswordGate({ code }: { code: string }) {
 function GameRoom({
   code,
   initial,
+  buckets,
 }: {
   code: string;
-  initial: { state: GameState; duetSide: DuetSide | null; classicRole: ClassicRole | null };
+  initial: {
+    id: string;
+    state: GameState;
+    duetSide: DuetSide | null;
+    classicRole: ClassicRole | null;
+    isOwner: boolean;
+    hasPassword: boolean;
+    bucketIds: string[];
+  };
+  buckets: Bucket[] | null;
 }) {
   const { toast } = useToast();
   const [state, setState] = useState<GameState>(initial.state);
@@ -203,11 +222,23 @@ function GameRoom({
           <h1 className="text-4xl font-bold">Codenames</h1>
           <span className="text-muted-foreground font-mono hidden sm:inline">{code}</span>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <Button variant="ghost" onClick={handleNewGame} disabled={dealing}>
             {dealing ? <LoaderIcon className="animate-spin-slow" /> : <RefreshCw />}
             New Game
           </Button>
+          {initial.isOwner && buckets && (
+            <RoomSettingsDialog
+              room={{
+                id: initial.id,
+                code,
+                hasPassword: initial.hasPassword,
+                mode: state.mode,
+                buckets: initial.bucketIds.map((id) => ({ id })),
+              }}
+              buckets={buckets}
+            />
+          )}
           <UserMenu />
         </div>
       </div>

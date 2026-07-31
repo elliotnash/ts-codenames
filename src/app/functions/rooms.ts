@@ -153,6 +153,7 @@ export const getRoom = createServerFn()
     return {
       status: 'ok' as const,
       room: {
+        id: room.id,
         code: room.code,
         duetSide,
         classicRole,
