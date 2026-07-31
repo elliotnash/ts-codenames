@@ -1,9 +1,10 @@
 import { useForm } from '@tanstack/react-form';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { Link, createFileRoute } from '@tanstack/react-router';
 import { LoaderIcon, MailIcon } from 'lucide-react';
 import { useState } from 'react';
 import { z } from 'zod';
-import { GridBG } from '~/components/background';
+import { AuthShell } from '~/components/auth-shell';
+import { m, riseItem } from '~/components/motion';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { FieldInfo } from '~/components/ui/field-info';
@@ -15,46 +16,48 @@ import { cn } from '~/lib/utils';
 
 export const Route = createFileRoute('/(auth)/forgot-password')({
   component: RouteComponent,
+  head: () => ({ meta: [{ title: 'Forgot password — Codenames' }] }),
 });
 
 function RouteComponent() {
   const [sentTo, setSentTo] = useState<string | null>(null);
 
   return (
-    <div>
-      <GridBG />
-
-      <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-        <div className="w-full max-w-sm">
-          {sentTo ? <SentCard email={sentTo} /> : <ForgotPasswordForm onSent={setSentTo} />}
-        </div>
-      </div>
-    </div>
+    <AuthShell>
+      {sentTo ? <SentCard email={sentTo} /> : <ForgotPasswordForm onSent={setSentTo} />}
+    </AuthShell>
   );
 }
 
 function SentCard({ email }: { email: string }) {
   return (
-    <Card className="backdrop-blur-sm bg-card/25">
-      <CardHeader className="text-center">
-        <MailIcon className="mx-auto size-10 text-primary" />
-        <CardTitle>Check your email</CardTitle>
-        <CardDescription>
-          If an account exists for <span className="font-medium text-foreground">{email}</span>,
-          we sent it a password reset link.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="text-center text-sm">
-          <Link
-            to="/login"
-            className="underline underline-offset-4 transition-colors hover:text-foreground/80"
-          >
-            Back to login
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+    <m.div variants={riseItem}>
+      <Card className="backdrop-blur-sm bg-card/25">
+        <CardHeader className="text-center">
+          <MailIcon className="mx-auto size-10 text-primary" />
+          <p className="font-mono text-xs uppercase tracking-widest text-primary">
+            {'// Recovery'}
+          </p>
+          <CardTitle className="font-display text-2xl uppercase tracking-wide">
+            Check your email
+          </CardTitle>
+          <CardDescription>
+            If an account exists for <span className="font-medium text-foreground">{email}</span>,
+            we sent it a password reset link.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center text-sm">
+            <Link
+              to="/login"
+              className="underline underline-offset-4 transition-colors hover:text-foreground/80"
+            >
+              Back to login
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+    </m.div>
   );
 }
 
@@ -107,18 +110,21 @@ function ForgotPasswordForm({
         form.handleSubmit();
       }}
     >
-      <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Forgot your password?</h1>
+      <m.div variants={riseItem} className="flex flex-col items-center gap-2 text-center">
+        <p className="font-mono text-xs uppercase tracking-widest text-primary">{'// Recovery'}</p>
+        <h1 className="font-display text-2xl font-bold uppercase tracking-wide">Forgot password</h1>
         <p className="text-balance text-sm text-muted-foreground">
           Enter your email and we'll send you a link to reset it
         </p>
-      </div>
+      </m.div>
       <div className="grid gap-6">
         <form.Field
           name="email"
           children={(field) => (
-            <div className="grid gap-2">
-              <Label htmlFor={field.name}>Email</Label>
+            <m.div variants={riseItem} className="grid gap-2">
+              <Label htmlFor={field.name} className="block pb-1">
+                Email
+              </Label>
               <Input
                 id={field.name}
                 name={field.name}
@@ -130,16 +136,18 @@ function ForgotPasswordForm({
                 required
               />
               <FieldInfo field={field} hasSubmitted={hasSubmitted} />
-            </div>
+            </m.div>
           )}
         />
 
-        <Button type="submit" className="w-full">
-          {form.state.isSubmitting && <LoaderIcon className="animate-spin-slow" />}
-          Send reset link
-        </Button>
+        <m.div variants={riseItem}>
+          <Button type="submit" className="w-full">
+            {form.state.isSubmitting && <LoaderIcon className="animate-spin-slow" />}
+            Send reset link
+          </Button>
+        </m.div>
       </div>
-      <div className="text-center text-sm">
+      <m.div variants={riseItem} className="text-center text-sm">
         Remembered it?{' '}
         <Link
           to="/login"
@@ -147,7 +155,7 @@ function ForgotPasswordForm({
         >
           Log in
         </Link>
-      </div>
+      </m.div>
     </form>
   );
 }

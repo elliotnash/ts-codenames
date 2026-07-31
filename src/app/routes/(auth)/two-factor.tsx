@@ -2,7 +2,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { LoaderIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { GridBG } from '~/components/background';
+import { AuthShell } from '~/components/auth-shell';
+import { m, riseItem } from '~/components/motion';
 import { Button } from '~/components/ui/button';
 import { Checkbox } from '~/components/ui/checkbox';
 import { Input } from '~/components/ui/input';
@@ -15,6 +16,7 @@ import { twoFactorSearchSchema } from '~/lib/schema';
 
 export const Route = createFileRoute('/(auth)/two-factor')({
   component: RouteComponent,
+  head: () => ({ meta: [{ title: 'Two-factor — Codenames' }] }),
   validateSearch: twoFactorSearchSchema,
   beforeLoad: async ({ search, context: { queryClient } }) => {
     // Redirect if already authenticated
@@ -112,121 +114,130 @@ function RouteComponent() {
   };
 
   return (
-    <div>
-      <GridBG />
+    <AuthShell>
+      <div className="flex flex-col gap-6">
+        <m.div variants={riseItem} className="flex flex-col items-center gap-2 text-center">
+          <p className="font-mono text-xs uppercase tracking-widest text-primary">
+            {'// Second key'}
+          </p>
+          <h1 className="font-display text-2xl font-bold uppercase tracking-wide">
+            Two-factor authentication
+          </h1>
+          <p className="text-balance text-sm text-muted-foreground">
+            {mode === 'totp' && 'Enter the 6-digit code from your authenticator app'}
+            {mode === 'otp' &&
+              (otpSent
+                ? 'Enter the 6-digit code we emailed you'
+                : "We'll email a 6-digit code to your address")}
+            {mode === 'backup' && 'Enter one of your backup codes'}
+          </p>
+        </m.div>
 
-      <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-        <div className="w-full max-w-sm flex flex-col gap-6">
-          <div className="flex flex-col items-center gap-2 text-center">
-            <h1 className="text-2xl font-bold">Two-factor authentication</h1>
-            <p className="text-balance text-sm text-muted-foreground">
-              {mode === 'totp' && 'Enter the 6-digit code from your authenticator app'}
-              {mode === 'otp' &&
-                (otpSent
-                  ? 'Enter the 6-digit code we emailed you'
-                  : "We'll email a 6-digit code to your address")}
-              {mode === 'backup' && 'Enter one of your backup codes'}
-            </p>
-          </div>
-
-          <div className="grid gap-6">
-            {mode === 'backup' ? (
-              <form
-                className="grid gap-2"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  verify(code);
-                }}
-              >
-                <Label htmlFor="backup-code">Backup code</Label>
-                <Input
-                  id="backup-code"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  autoComplete="off"
-                  autoFocus
-                  required
-                />
-              </form>
-            ) : mode === 'otp' && !otpSent ? (
+        <div className="grid gap-6">
+          {mode === 'backup' ? (
+            <m.form
+              variants={riseItem}
+              className="grid gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                verify(code);
+              }}
+            >
+              <Label htmlFor="backup-code" className="block pb-1">
+                Backup code
+              </Label>
+              <Input
+                id="backup-code"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                autoComplete="off"
+                autoFocus
+                required
+              />
+            </m.form>
+          ) : mode === 'otp' && !otpSent ? (
+            <m.div variants={riseItem}>
               <Button onClick={sendOtp} className="w-full">
                 Email me a code
               </Button>
-            ) : (
-              <div className="flex justify-center">
-                <InputOTP
-                  maxLength={6}
-                  value={code}
-                  onChange={setCode}
-                  onComplete={verify}
-                  autoFocus
-                  disabled={submitting}
-                >
-                  <InputOTPGroup>
-                    {[0, 1, 2, 3, 4, 5].map((i) => (
-                      <InputOTPSlot key={i} index={i} />
-                    ))}
-                  </InputOTPGroup>
-                </InputOTP>
-              </div>
-            )}
-
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="trust-device"
-                checked={trustDevice}
-                onCheckedChange={(checked) => setTrustDevice(checked === true)}
-              />
-              <Label htmlFor="trust-device" className="text-sm font-normal">
-                Trust this device for 30 days
-              </Label>
-            </div>
-
-            {(mode === 'backup' || (mode === 'otp' && otpSent)) && (
-              <Button onClick={() => verify(code)} disabled={submitting || !code} className="w-full">
-                {submitting && <LoaderIcon className="animate-spin-slow" />}
-                Verify
-              </Button>
-            )}
-
-            {mode === 'otp' && otpSent && (
-              <Button variant="outline" onClick={sendOtp} disabled={cooldown > 0} className="w-full">
-                {cooldown > 0 ? `Resend code (${cooldown}s)` : 'Resend code'}
-              </Button>
-            )}
-          </div>
-
-          <div className="flex flex-col items-center gap-1 text-center text-sm text-muted-foreground">
-            {mode !== 'totp' && search.totp && (
-              <button
-                type="button"
-                onClick={() => switchMode('totp')}
-                className="underline underline-offset-4 transition-colors hover:text-foreground/80"
+            </m.div>
+          ) : (
+            <m.div variants={riseItem} className="flex justify-center">
+              <InputOTP
+                maxLength={6}
+                value={code}
+                onChange={setCode}
+                onComplete={verify}
+                autoFocus
+                disabled={submitting}
               >
-                Use your authenticator app
-              </button>
-            )}
-            {mode !== 'otp' && search.otp && (
-              <button
-                type="button"
-                onClick={() => switchMode('otp')}
-                className="underline underline-offset-4 transition-colors hover:text-foreground/80"
-              >
-                Email me a code instead
-              </button>
-            )}
-            {mode !== 'backup' && (
-              <button
-                type="button"
-                onClick={() => switchMode('backup')}
-                className="underline underline-offset-4 transition-colors hover:text-foreground/80"
-              >
-                Use a backup code
-              </button>
-            )}
-          </div>
+                <InputOTPGroup>
+                  {[0, 1, 2, 3, 4, 5].map((i) => (
+                    <InputOTPSlot key={i} index={i} />
+                  ))}
+                </InputOTPGroup>
+              </InputOTP>
+            </m.div>
+          )}
+
+          <m.div variants={riseItem} className="flex items-center gap-2">
+            <Checkbox
+              id="trust-device"
+              checked={trustDevice}
+              onCheckedChange={(checked) => setTrustDevice(checked === true)}
+            />
+            <Label htmlFor="trust-device" className="text-sm font-normal">
+              Trust this device for 30 days
+            </Label>
+          </m.div>
+
+          {(mode === 'backup' || (mode === 'otp' && otpSent)) && (
+            <Button onClick={() => verify(code)} disabled={submitting || !code} className="w-full">
+              {submitting && <LoaderIcon className="animate-spin-slow" />}
+              Verify
+            </Button>
+          )}
+
+          {mode === 'otp' && otpSent && (
+            <Button variant="outline" onClick={sendOtp} disabled={cooldown > 0} className="w-full">
+              {cooldown > 0 ? `Resend code (${cooldown}s)` : 'Resend code'}
+            </Button>
+          )}
         </div>
+
+        <m.div
+          variants={riseItem}
+          className="flex flex-col items-center gap-1 text-center text-sm text-muted-foreground"
+        >
+          {mode !== 'totp' && search.totp && (
+            <button
+              type="button"
+              onClick={() => switchMode('totp')}
+              className="underline underline-offset-4 transition-colors hover:text-foreground/80"
+            >
+              Use your authenticator app
+            </button>
+          )}
+          {mode !== 'otp' && search.otp && (
+            <button
+              type="button"
+              onClick={() => switchMode('otp')}
+              className="underline underline-offset-4 transition-colors hover:text-foreground/80"
+            >
+              Email me a code instead
+            </button>
+          )}
+          {mode !== 'backup' && (
+            <button
+              type="button"
+              onClick={() => switchMode('backup')}
+              className="underline underline-offset-4 transition-colors hover:text-foreground/80"
+            >
+              Use a backup code
+            </button>
+          )}
+        </m.div>
       </div>
-    </div>
+    </AuthShell>
   );
 }

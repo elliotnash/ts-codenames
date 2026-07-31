@@ -1,24 +1,26 @@
-import { cn } from '~/lib/utils';
+import { useForm } from '@tanstack/react-form';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
-import { useForm } from '@tanstack/react-form';
+import { cn } from '~/lib/utils';
 
-import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router';
-import { GridBG } from '~/components/background';
-import { z } from 'zod';
-import { useEffect, useState } from 'react';
-import { FieldInfo } from '~/components/ui/field-info';
-import { GithubIcon } from '~/components/github-icon';
-import { authClient } from '~/lib/auth-client';
-import { useToast } from '~/hooks/use-toast';
-import { LoaderIcon } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { Link, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
+import { LoaderIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { z } from 'zod';
+import { AuthShell } from '~/components/auth-shell';
+import { GithubIcon } from '~/components/github-icon';
+import { m, riseItem } from '~/components/motion';
+import { FieldInfo } from '~/components/ui/field-info';
 import { useAuth, useAuthOptions } from '~/hooks/use-auth';
+import { useToast } from '~/hooks/use-toast';
+import { authClient } from '~/lib/auth-client';
 import { authSearchSchema } from '~/lib/schema';
 
 export const Route = createFileRoute('/(auth)/login')({
   component: RouteComponent,
+  head: () => ({ meta: [{ title: 'Log in — Codenames' }] }),
   validateSearch: authSearchSchema,
   beforeLoad: async ({ search, context: { queryClient } }) => {
     // Redirect if already authenticated
@@ -31,15 +33,9 @@ export const Route = createFileRoute('/(auth)/login')({
 
 function RouteComponent() {
   return (
-    <div>
-      <GridBG />
-
-      <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-        <div className="w-full max-w-sm">
-          <LoginForm />
-        </div>
-      </div>
-    </div>
+    <AuthShell>
+      <LoginForm />
+    </AuthShell>
   );
 }
 
@@ -171,18 +167,23 @@ function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'form
         form.handleSubmit();
       }}
     >
-      <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Log in to your account</h1>
+      <m.div variants={riseItem} className="flex flex-col items-center gap-2 text-center">
+        <p className="font-mono text-xs uppercase tracking-widest text-primary">
+          {'// Identification'}
+        </p>
+        <h1 className="font-display text-2xl font-bold uppercase tracking-wide">Log in</h1>
         <p className="text-balance text-sm text-muted-foreground">
           Enter your email below to log in to your account
         </p>
-      </div>
+      </m.div>
       <div className="grid gap-6">
         <form.Field
           name="email"
           children={(field) => (
-            <div className="grid gap-2">
-              <Label htmlFor={field.name}>Email</Label>
+            <m.div variants={riseItem} className="grid gap-2">
+              <Label htmlFor={field.name} className="block pb-1">
+                Email
+              </Label>
               <Input
                 id={field.name}
                 name={field.name}
@@ -194,15 +195,15 @@ function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'form
                 required
               />
               <FieldInfo field={field} hasSubmitted={hasSubmitted} />
-            </div>
+            </m.div>
           )}
         />
 
         <form.Field
           name="password"
           children={(field) => (
-            <div className="grid gap-2">
-              <div className="flex items-center">
+            <m.div variants={riseItem} className="grid gap-2">
+              <div className="flex items-center pb-1">
                 <Label htmlFor={field.name}>Password</Label>
                 <Link
                   to="/forgot-password"
@@ -221,31 +222,33 @@ function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'form
                 required
               />
               <FieldInfo field={field} hasSubmitted={hasSubmitted} />
-            </div>
+            </m.div>
           )}
         />
 
-        <Button type="submit" className="w-full">
-          {form.state.isSubmitting && <LoaderIcon className="animate-spin-slow" />}
-          Log In
-        </Button>
-        <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-          <span className="relative z-10 bg-background px-2 text-muted-foreground">
-            Or continue with
-          </span>
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          disabled={githubLoading}
-          onClick={handleGithubSignIn}
-        >
-          {githubLoading ? <LoaderIcon className="animate-spin-slow" /> : <GithubIcon />}
-          GitHub
-        </Button>
+        <m.div variants={riseItem} className="grid gap-6">
+          <Button type="submit" className="w-full">
+            {form.state.isSubmitting && <LoaderIcon className="animate-spin-slow" />}
+            Log In
+          </Button>
+          <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+            <span className="relative z-10 bg-background px-2 text-muted-foreground">
+              Or continue with
+            </span>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            disabled={githubLoading}
+            onClick={handleGithubSignIn}
+          >
+            {githubLoading ? <LoaderIcon className="animate-spin-slow" /> : <GithubIcon />}
+            GitHub
+          </Button>
+        </m.div>
       </div>
-      <div className="text-center text-sm">
+      <m.div variants={riseItem} className="text-center text-sm">
         Don't have an account?{' '}
         <Link
           to="/register"
@@ -253,7 +256,7 @@ function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'form
         >
           Register
         </Link>
-      </div>
+      </m.div>
     </form>
   );
 }

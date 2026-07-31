@@ -1,7 +1,8 @@
-import { createFileRoute, Link, redirect } from '@tanstack/react-router';
+import { Link, createFileRoute, redirect } from '@tanstack/react-router';
 import { LoaderIcon, MailIcon, TriangleAlertIcon } from 'lucide-react';
 import { useState } from 'react';
-import { GridBG } from '~/components/background';
+import { AuthShell } from '~/components/auth-shell';
+import { m, riseItem } from '~/components/motion';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { useAuthOptions } from '~/hooks/use-auth';
@@ -11,6 +12,7 @@ import { verifyEmailSearchSchema } from '~/lib/schema';
 
 export const Route = createFileRoute('/(auth)/verify-email')({
   component: RouteComponent,
+  head: () => ({ meta: [{ title: 'Verify email — Codenames' }] }),
   validateSearch: verifyEmailSearchSchema,
   beforeLoad: async ({ search, context: { queryClient } }) => {
     // Clicking the emailed link auto-signs the user in and lands here —
@@ -50,16 +52,19 @@ function RouteComponent() {
   };
 
   return (
-    <div>
-      <GridBG />
-
-      <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-        <Card className="w-full max-w-sm backdrop-blur-sm bg-card/25">
+    <AuthShell>
+      <m.div variants={riseItem}>
+        <Card className="backdrop-blur-sm bg-card/25">
           <CardHeader className="text-center">
             {search.error ? (
               <>
                 <TriangleAlertIcon className="mx-auto size-10 text-destructive" />
-                <CardTitle>Verification link invalid</CardTitle>
+                <p className="font-mono text-xs uppercase tracking-widest text-primary">
+                  {'// Confirmation'}
+                </p>
+                <CardTitle className="font-display text-2xl uppercase tracking-wide">
+                  Verification link invalid
+                </CardTitle>
                 <CardDescription>
                   The link may have expired or already been used. Request a new one below.
                 </CardDescription>
@@ -67,7 +72,12 @@ function RouteComponent() {
             ) : (
               <>
                 <MailIcon className="mx-auto size-10 text-primary" />
-                <CardTitle>Check your email</CardTitle>
+                <p className="font-mono text-xs uppercase tracking-widest text-primary">
+                  {'// Confirmation'}
+                </p>
+                <CardTitle className="font-display text-2xl uppercase tracking-wide">
+                  Check your email
+                </CardTitle>
                 <CardDescription>
                   We sent a verification link to{' '}
                   <span className="font-medium text-foreground">
@@ -97,7 +107,7 @@ function RouteComponent() {
             </div>
           </CardContent>
         </Card>
-      </div>
-    </div>
+      </m.div>
+    </AuthShell>
   );
 }
