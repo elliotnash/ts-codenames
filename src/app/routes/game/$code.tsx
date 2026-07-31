@@ -1,8 +1,9 @@
 import { Link, createFileRoute, useRouter } from '@tanstack/react-router';
-import { LoaderIcon, Lock, RefreshCw } from 'lucide-react';
+import { LoaderIcon, Lock, RefreshCw, Skull } from 'lucide-react';
 import { useState } from 'react';
 import { match } from 'ts-pattern';
 import { GradientBG, GridBG } from '~/components/background';
+import { AutoFlipTile, ErrorScreen } from '~/components/error-card';
 import { ClassicBoard } from '~/components/game/classic-board';
 import { ClassicRolePicker } from '~/components/game/classic-role-picker';
 import { DuetBoard } from '~/components/game/duet-board';
@@ -32,15 +33,34 @@ export const Route = createFileRoute('/game/$code')({
     const buckets = data.status === 'ok' && data.room.isOwner ? await getBuckets() : null;
     return { data, buckets };
   },
+  head: ({ params }) => ({ meta: [{ title: `${params.code} — Codenames` }] }),
   component: GamePage,
-  notFoundComponent: () => (
-    <MessageCard title="Room not found" description="There is no room with this code.">
-      <Button asChild className="w-full">
-        <Link to="/">Back to Home</Link>
-      </Button>
-    </MessageCard>
-  ),
+  notFoundComponent: RoomNotFound,
 });
+
+function RoomNotFound() {
+  const { code } = Route.useParams();
+  return (
+    <ErrorScreen
+      eyebrow="// Transmission lost"
+      title="Room not found"
+      code={code}
+      description="No room answers at this code. It may have been deleted, or the code was mistyped."
+      tile={
+        <AutoFlipTile variant="death">
+          <Skull className="size-5" />
+        </AutoFlipTile>
+      }
+    >
+      <Button asChild className="w-full">
+        <Link to="/">Back to home</Link>
+      </Button>
+      <Button asChild variant="outline" className="w-full">
+        <Link to="/dashboard">Open dashboard</Link>
+      </Button>
+    </ErrorScreen>
+  );
+}
 
 function GamePage() {
   const { data, buckets } = Route.useLoaderData();
@@ -49,31 +69,6 @@ function GamePage() {
   }
   return (
     <GameRoom key={data.room.code} code={data.room.code} initial={data.room} buckets={buckets} />
-  );
-}
-
-function MessageCard({
-  title,
-  description,
-  children,
-}: {
-  title: string;
-  description: string;
-  children?: React.ReactNode;
-}) {
-  return (
-    <div>
-      <GridBG />
-      <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-        <Card className="w-full max-w-sm backdrop-blur-sm bg-card/25">
-          <CardHeader>
-            <CardTitle>{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </CardHeader>
-          <CardContent>{children}</CardContent>
-        </Card>
-      </div>
-    </div>
   );
 }
 
@@ -206,11 +201,20 @@ function GameRoom({
 
   if (roomDeleted) {
     return (
-      <MessageCard title="Room deleted" description="This room was deleted by its owner.">
+      <ErrorScreen
+        eyebrow="// Room closed"
+        title="Room deleted"
+        code={code}
+        description="The owner deleted this room. Create a new one from your dashboard."
+        tile={<AutoFlipTile variant="bystander" />}
+      >
         <Button asChild className="w-full">
-          <Link to="/">Back to Home</Link>
+          <Link to="/">Back to home</Link>
         </Button>
-      </MessageCard>
+        <Button asChild variant="outline" className="w-full">
+          <Link to="/dashboard">Open dashboard</Link>
+        </Button>
+      </ErrorScreen>
     );
   }
 
