@@ -3,12 +3,17 @@ import { createServerFn } from '@tanstack/react-start';
 import { sql } from 'kysely';
 import { match } from 'ts-pattern';
 import { z } from 'zod';
-import { BOARD_SIZE, unionBucketWords } from '~/lib/deal';
 import { db } from '~/lib/db';
-import { buildDuetPublicState, buildGameState, type RoomBoardRow } from '~/lib/game-state';
+import { BOARD_SIZE, unionBucketWords } from '~/lib/deal';
+import { type RoomBoardRow, buildDuetPublicState, buildGameState } from '~/lib/game-state';
 import { DUET_TOTAL_AGENTS, dealGame } from '~/lib/modes';
-import { grantRoomAccess, hashRoomPassword, hasRoomAccess, verifyRoomPassword } from '~/lib/room-access';
-import { generateRoomCode, ROOM_CODE_REGEX } from '~/lib/room-codes';
+import {
+  grantRoomAccess,
+  hasRoomAccess,
+  hashRoomPassword,
+  verifyRoomPassword,
+} from '~/lib/room-access';
+import { ROOM_CODE_REGEX, generateRoomCode } from '~/lib/room-codes';
 import { type DuetCard, DuetSideSchema, type GameMode, GameModeSchema } from '~/lib/room-events';
 import { broadcast, closeRoom } from '~/lib/room-state';
 import { getSessionUser, requestHeaders, requireUser } from '~/lib/session';
@@ -25,7 +30,11 @@ const RoomCodeSchema = z
   );
 
 function findRoomByCode(code: string) {
-  return db.selectFrom('room').selectAll().where('code', '=', code.toLowerCase()).executeTakeFirst();
+  return db
+    .selectFrom('room')
+    .selectAll()
+    .where('code', '=', code.toLowerCase())
+    .executeTakeFirst();
 }
 
 async function requireRoomByCode(code: string) {

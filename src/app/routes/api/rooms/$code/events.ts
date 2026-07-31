@@ -3,7 +3,7 @@ import { db } from '~/lib/db';
 import { buildGameState } from '~/lib/game-state';
 import { hasRoomAccess } from '~/lib/room-access';
 import { DuetSideSchema } from '~/lib/room-events';
-import { send, sendPing, subscribe, type Subscriber, unsubscribe } from '~/lib/room-state';
+import { type Subscriber, send, sendPing, subscribe, unsubscribe } from '~/lib/room-state';
 
 export const Route = createFileRoute('/api/rooms/$code/events')({
   server: {
