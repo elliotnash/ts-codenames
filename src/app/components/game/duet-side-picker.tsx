@@ -14,7 +14,8 @@ function KeyMotif({ side }: { side: DuetSide }) {
     <div className="grid grid-cols-5 gap-1">
       {SIDE_MOTIFS[side].split('').map((cell, i) => (
         <div
-          key={`${side}-${i * 1}`}
+          // biome-ignore lint/suspicious/noArrayIndexKey: fixed decorative pattern
+          key={`${side}-${i}`}
           className={cn(
             'size-2 rounded-[3px] transition-colors',
             cell === 'g' && 'bg-card-agent',

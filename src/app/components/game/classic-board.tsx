@@ -1,22 +1,27 @@
 import { cva } from 'class-variance-authority';
-import { useMemo, useState } from 'react';
+import { ArrowLeftRight, Skull } from 'lucide-react';
+import { useMemo } from 'react';
 import { FlipCard, cardBaseStyle } from '~/components/game/flip-card';
 import { Badge } from '~/components/ui/badge';
+import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
-import { Label } from '~/components/ui/label';
-import { Switch } from '~/components/ui/switch';
 import { revealCard } from '~/functions/rooms';
 import type { Category, ClassicState, GameState } from '~/lib/room-events';
+import type { ClassicRole } from '~/lib/room-view-cookies';
 import { cn } from '~/lib/utils';
 
 export function ClassicBoard({
   code,
   state,
   setState,
+  role,
+  onSwitchRole,
 }: {
   code: string;
   state: ClassicState;
   setState: React.Dispatch<React.SetStateAction<GameState>>;
+  role: ClassicRole;
+  onSwitchRole: () => void;
 }) {
   const { words, categories } = state;
   const revealed = useMemo(() => new Set(state.revealed), [state.revealed]);
@@ -35,8 +40,7 @@ export function ClassicBoard({
     [categories, revealed, redStart],
   );
 
-  // Spymaster toggle
-  const [isSpymaster, setIsSpymaster] = useState(false);
+  const isSpymaster = role === 'spymaster';
 
   function handleReveal(index: number) {
     if (revealed.has(index)) return;
@@ -65,9 +69,11 @@ export function ClassicBoard({
         <div className="flex space-x-4">
           {state.startingTeam === 'red' ? scoreBadges : scoreBadges.reverse()}
         </div>
-        <div className="flex items-center space-x-2">
-          <Switch id="spymaster-mode" checked={isSpymaster} onCheckedChange={setIsSpymaster} />
-          <Label htmlFor="spymaster-mode">Spymaster Mode</Label>
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary">{isSpymaster ? 'Spymaster' : 'Operative'}</Badge>
+          <Button variant="ghost" size="sm" onClick={onSwitchRole}>
+            <ArrowLeftRight /> Switch role
+          </Button>
         </div>
       </div>
 
@@ -131,11 +137,15 @@ function GameCard({
           onClick={onClick}
           className={cn(
             cardBaseStyle,
+            'relative',
             cardCategoryVariants(),
             spymaster && cardSpymasterVariants({ variant: category }),
           )}
         >
           <CardContent className="text-center p-0">{children.toUpperCase()}</CardContent>
+          {spymaster && category === 'death' && (
+            <Skull className="absolute bottom-1.5 right-1.5 size-3.5 opacity-70" />
+          )}
         </Card>
       }
       back={

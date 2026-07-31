@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { match } from 'ts-pattern';
 import { GradientBG, GridBG } from '~/components/background';
 import { ClassicBoard } from '~/components/game/classic-board';
+import { ClassicRolePicker } from '~/components/game/classic-role-picker';
 import { DuetBoard } from '~/components/game/duet-board';
 import { DuetSidePicker } from '~/components/game/duet-side-picker';
 import { Button } from '~/components/ui/button';
@@ -12,10 +13,15 @@ import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import { UserMenu } from '~/components/user-menu';
 import { getRoom, newGame, submitRoomPassword } from '~/functions/rooms';
-import { useDuetSide } from '~/hooks/use-duet-side';
+import { useCookieState } from '~/hooks/use-cookie-state';
 import { useRoomStream } from '~/hooks/use-room-stream';
 import { useToast } from '~/hooks/use-toast';
 import type { DuetSide, GameState } from '~/lib/room-events';
+import {
+  type ClassicRole,
+  classicRoleCookieName,
+  duetSideCookieName,
+} from '~/lib/room-view-cookies';
 
 export const Route = createFileRoute('/game/$code')({
   loader: ({ params }) => getRoom({ data: { code: params.code } }),
@@ -129,14 +135,18 @@ function GameRoom({
   initial,
 }: {
   code: string;
-  initial: { state: GameState; duetSide: DuetSide | null };
+  initial: { state: GameState; duetSide: DuetSide | null; classicRole: ClassicRole | null };
 }) {
   const { toast } = useToast();
   const [state, setState] = useState<GameState>(initial.state);
   const [roomDeleted, setRoomDeleted] = useState(false);
   // The declared side always rides on the stream URL (even for classic rooms),
   // so a live switch to duet delivers this viewer's key without a reconnect dance.
-  const [side, setSide] = useDuetSide(code, initial.duetSide);
+  const [side, setSide] = useCookieState<DuetSide>(duetSideCookieName(code), initial.duetSide);
+  const [role, setRole] = useCookieState<ClassicRole>(
+    classicRoleCookieName(code),
+    initial.classicRole,
+  );
 
   useRoomStream(code, side, !roomDeleted, (event) => {
     match(event)
@@ -202,9 +212,19 @@ function GameRoom({
         </div>
       </div>
       {match(state)
-        .with({ mode: 'classic' }, (classic) => (
-          <ClassicBoard code={code} state={classic} setState={setState} />
-        ))
+        .with({ mode: 'classic' }, (classic) =>
+          role === null ? (
+            <ClassicRolePicker onPick={setRole} />
+          ) : (
+            <ClassicBoard
+              code={code}
+              state={classic}
+              setState={setState}
+              role={role}
+              onSwitchRole={() => setRole(null)}
+            />
+          ),
+        )
         .with({ mode: 'duet' }, (duet) =>
           side === null ? (
             <DuetSidePicker duet={duet.duet} onPick={setSide} />

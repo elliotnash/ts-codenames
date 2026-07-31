@@ -5,7 +5,6 @@ import { match } from 'ts-pattern';
 import { z } from 'zod';
 import { db } from '~/lib/db';
 import { BOARD_SIZE, unionBucketWords } from '~/lib/deal';
-import { duetSideFromHeaders } from '~/lib/duet-side';
 import { type RoomBoardRow, buildDuetPublicState, buildGameState } from '~/lib/game-state';
 import { DUET_TOTAL_AGENTS, dealGame } from '~/lib/modes';
 import {
@@ -17,6 +16,7 @@ import {
 import { ROOM_CODE_REGEX, generateRoomCode } from '~/lib/room-codes';
 import { type DuetCard, DuetSideSchema, type GameMode, GameModeSchema } from '~/lib/room-events';
 import { broadcast, closeRoom } from '~/lib/room-state';
+import { classicRoleFromHeaders, duetSideFromHeaders } from '~/lib/room-view-cookies';
 import { getSessionUser, requestHeaders, requireUser } from '~/lib/session';
 import { ensureSystemBuckets } from '~/lib/system-buckets';
 
@@ -145,15 +145,17 @@ export const getRoom = createServerFn()
       .where('roomId', '=', room.id)
       .execute();
 
-    // The viewer's declared side comes from a per-room cookie, so SSR renders
-    // the right duet view (with that side's key) instead of flashing the picker.
+    // The viewer's declared side/role comes from per-room cookies, so SSR
+    // renders the right view (board vs. picker) instead of flashing the picker.
     const duetSide = duetSideFromHeaders(requestHeaders(), room.code);
+    const classicRole = classicRoleFromHeaders(requestHeaders(), room.code);
 
     return {
       status: 'ok' as const,
       room: {
         code: room.code,
         duetSide,
+        classicRole,
         state: buildGameState(room, duetSide),
         isOwner: user?.id === room.ownerId,
         hasPassword: room.passwordHash !== null,
