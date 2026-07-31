@@ -1,8 +1,9 @@
-import { LazyMotion, MotionConfig, domAnimation, m } from 'motion/react';
+import { AnimatePresence, LazyMotion, MotionConfig, domAnimation, m } from 'motion/react';
 import type { Variants } from 'motion/react';
 
-/* Motion is only loaded on the marketing pages (/, /how-to-play) — never import
-   this module from entry-bundled files (router.tsx and anything it reaches). */
+/* Never import this module from entry-bundled files (router.tsx → not-found.tsx →
+   error-card.tsx / demo-tile.tsx / site-header.tsx) — those stay CSS-animated.
+   Route files are code-split, so importing motion from them is fine. */
 
 export function MotionProvider({ children }: React.PropsWithChildren) {
   return (
@@ -12,7 +13,7 @@ export function MotionProvider({ children }: React.PropsWithChildren) {
   );
 }
 
-export { m };
+export { m, AnimatePresence };
 
 export const staggerParent: Variants = {
   hidden: {},
