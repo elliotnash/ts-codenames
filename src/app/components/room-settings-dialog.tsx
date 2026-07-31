@@ -122,7 +122,7 @@ export function RoomSettingsDialog({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Room Settings</DialogTitle>
+          <DialogTitle>Room settings</DialogTitle>
           <DialogDescription>
             Change the word buckets and password for <span className="font-mono">{room.code}</span>.
             New games deal from the selected buckets.
@@ -141,7 +141,7 @@ export function RoomSettingsDialog({
 
         <div className="space-y-2">
           <Label className="block pb-1">Word Buckets</Label>
-          <div className="rounded-md border divide-y max-h-52 overflow-y-auto">
+          <div className="rounded-md border bg-card/25 backdrop-blur-sm divide-y max-h-52 overflow-y-auto">
             {buckets.map((bucket) => (
               <label
                 key={bucket.id}

@@ -106,14 +106,16 @@ export function BucketFormDialog({
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{bucket ? `Edit ${bucket.name}` : 'New Word Bucket'}</DialogTitle>
+          <DialogTitle>{bucket ? `Edit ` : 'New word bucket'}</DialogTitle>
           <DialogDescription>
             A word bucket is a named list of words that rooms can deal boards from.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="bucket-name">Name</Label>
+            <Label htmlFor="bucket-name" className="block pb-1">
+              Name
+            </Label>
             <Input
               id="bucket-name"
               value={name}
@@ -123,7 +125,9 @@ export function BucketFormDialog({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="bucket-description">Description (optional)</Label>
+            <Label htmlFor="bucket-description" className="block pb-1">
+              Description (optional)
+            </Label>
             <Input
               id="bucket-description"
               value={description}
@@ -133,7 +137,9 @@ export function BucketFormDialog({
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="bucket-language">Language (optional)</Label>
+              <Label htmlFor="bucket-language" className="block pb-1">
+                Language (optional)
+              </Label>
               <Input
                 id="bucket-language"
                 value={language}
@@ -142,7 +148,9 @@ export function BucketFormDialog({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="bucket-author">Author (optional)</Label>
+              <Label htmlFor="bucket-author" className="block pb-1">
+                Author (optional)
+              </Label>
               <Input
                 id="bucket-author"
                 value={author}
@@ -152,7 +160,9 @@ export function BucketFormDialog({
             </div>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="bucket-words">Words (comma-separated)</Label>
+            <Label htmlFor="bucket-words" className="block pb-1">
+              Words (comma-separated)
+            </Label>
             <Textarea
               id="bucket-words"
               value={words}
@@ -217,7 +227,10 @@ export function BucketImportDialog({ trigger }: { trigger: React.ReactNode }) {
       await router.invalidate();
       setOpen(false);
       setJson('');
-      toast({ title: 'Bucket imported', description: `${data.name} has ${data.words.length} words.` });
+      toast({
+        title: 'Bucket imported',
+        description: `${data.name} has ${data.words.length} words.`,
+      });
     } catch (err) {
       toast({
         variant: 'destructiveOutline',
@@ -234,14 +247,16 @@ export function BucketImportDialog({ trigger }: { trigger: React.ReactNode }) {
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Import Word Bucket</DialogTitle>
+          <DialogTitle>Import word bucket</DialogTitle>
           <DialogDescription>
             Upload or paste a bucket JSON file, like the ones the Export button produces.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleImport} className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="bucket-file">JSON file</Label>
+            <Label htmlFor="bucket-file" className="block pb-1">
+              JSON file
+            </Label>
             <Input
               id="bucket-file"
               type="file"
@@ -250,7 +265,9 @@ export function BucketImportDialog({ trigger }: { trigger: React.ReactNode }) {
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="bucket-json">Or paste JSON</Label>
+            <Label htmlFor="bucket-json" className="block pb-1">
+              Or paste JSON
+            </Label>
             <Textarea
               id="bucket-json"
               value={json}
