@@ -40,38 +40,48 @@ export function DemoTile({
   tileClassName?: string;
 }) {
   const interactive = onClick ? 'cursor-pointer' : 'cursor-default';
-  return (
-    <div aria-hidden onClick={onClick}>
-      <FlipCard
-        flipped={flipped}
-        className={cn(interactive, className)}
-        front={
-          <Card
-            className={cn(
-              tileBaseStyle,
-              interactive,
-              'text-card-foreground text-xs font-medium uppercase',
-              tileClassName,
-            )}
-          >
-            {word?.toUpperCase()}
-          </Card>
-        }
-        back={
-          <Card
-            className={cn(
-              tileBaseStyle,
-              interactive,
-              'text-xs font-medium uppercase',
-              tileVariants({ variant }),
-              tileClassName,
-            )}
-          >
-            {children ?? word?.toUpperCase()}
-          </Card>
-        }
-      />
-    </div>
+  const card = (
+    <FlipCard
+      flipped={flipped}
+      className={cn(interactive, className)}
+      front={
+        <Card
+          className={cn(
+            tileBaseStyle,
+            interactive,
+            'text-card-foreground text-xs font-medium uppercase',
+            tileClassName,
+          )}
+        >
+          {word?.toUpperCase()}
+        </Card>
+      }
+      back={
+        <Card
+          className={cn(
+            tileBaseStyle,
+            interactive,
+            'text-xs font-medium uppercase',
+            tileVariants({ variant }),
+            tileClassName,
+          )}
+        >
+          {children ?? word?.toUpperCase()}
+        </Card>
+      }
+    />
+  );
+  return onClick ? (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`Reveal ${word ?? 'card'}`}
+      className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      {card}
+    </button>
+  ) : (
+    <div aria-hidden>{card}</div>
   );
 }
 
