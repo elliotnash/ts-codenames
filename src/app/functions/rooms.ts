@@ -1,12 +1,15 @@
 import { notFound } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { sql } from 'kysely';
+import { match } from 'ts-pattern';
 import { z } from 'zod';
-import { BOARD_SIZE, dealBoard, unionBucketWords } from '~/lib/deal';
+import { BOARD_SIZE, unionBucketWords } from '~/lib/deal';
 import { db } from '~/lib/db';
+import { buildDuetPublicState, buildGameState, type RoomBoardRow } from '~/lib/game-state';
+import { DUET_TOTAL_AGENTS, dealGame } from '~/lib/modes';
 import { grantRoomAccess, hashRoomPassword, hasRoomAccess, verifyRoomPassword } from '~/lib/room-access';
 import { generateRoomCode, ROOM_CODE_REGEX } from '~/lib/room-codes';
-import type { Category, Team } from '~/lib/room-events';
+import { type DuetCard, DuetSideSchema, type GameMode, GameModeSchema } from '~/lib/room-events';
 import { broadcast, closeRoom } from '~/lib/room-state';
 import { getSessionUser, requestHeaders, requireUser } from '~/lib/session';
 import { ensureSystemBuckets } from '~/lib/system-buckets';
@@ -70,6 +73,7 @@ export const createRoom = createServerFn({ method: 'POST' })
       code: RoomCodeSchema.optional(),
       bucketIds: z.array(z.string()).min(1),
       password: z.string().min(1).max(128).optional(),
+      mode: GameModeSchema.default('classic'),
     }),
   )
   .handler(async ({ data }) => {
@@ -86,8 +90,7 @@ export const createRoom = createServerFn({ method: 'POST' })
       code = await generateAvailableCode();
     }
 
-    const startingTeam: Team = Math.random() < 0.5 ? 'red' : 'blue';
-    const board = dealBoard(union, startingTeam);
+    const board = dealGame(data.mode, union);
     const roomId = crypto.randomUUID();
 
     await db
@@ -97,9 +100,8 @@ export const createRoom = createServerFn({ method: 'POST' })
         code,
         ownerId: user.id,
         passwordHash: data.password ? await hashRoomPassword(data.password) : null,
-        words: board.words,
-        categories: board.categories,
-        startingTeam,
+        mode: data.mode,
+        ...board,
       })
       .execute();
     await db
@@ -137,11 +139,8 @@ export const getRoom = createServerFn()
       status: 'ok' as const,
       room: {
         code: room.code,
-        deal: room.deal,
-        startingTeam: room.startingTeam as Team,
-        words: room.words,
-        categories: room.categories as Category[],
-        revealed: room.revealed,
+        // No side is known here, so a live duet key is never included.
+        state: buildGameState(room, null),
         isOwner: user?.id === room.ownerId,
         hasPassword: room.passwordHash !== null,
         bucketIds: bucketRows.map((row) => row.bucketId),
@@ -170,6 +169,7 @@ export const revealCard = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const room = await requireRoomByCode(data.code);
     if (!(await hasRoomAccess(room, requestHeaders()))) throw new Error('Access denied');
+    if (room.mode !== 'classic') throw new Error('Not a classic room');
 
     // Atomic append; the deal predicate drops reveals that raced a re-deal.
     const result = await db
@@ -186,6 +186,137 @@ export const revealCard = createServerFn({ method: 'POST' })
     }
   });
 
+const DUET_STATE_COLUMNS = [
+  'duetAgents',
+  'duetBystandersA',
+  'duetBystandersB',
+  'duetTokens',
+  'duetStatus',
+  'duetFatalCard',
+  'duetFatalSide',
+] as const;
+
+export const duetGuess = createServerFn({ method: 'POST' })
+  .validator(
+    z.object({
+      code: z.string(),
+      card: z.number().int().min(0).max(24),
+      side: DuetSideSchema,
+      deal: z.number().int().min(1),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const room = await requireRoomByCode(data.code);
+    if (!(await hasRoomAccess(room, requestHeaders()))) throw new Error('Access denied');
+    if (room.mode !== 'duet') throw new Error('Not a duet room');
+    if (room.deal !== data.deal || room.duetStatus !== 'playing') return;
+
+    // A guess resolves against the OTHER side's key. Branching on this read is
+    // race-safe: keys are immutable within a deal and the update is deal-guarded.
+    const key = data.side === 'a' ? room.duetKeyB : room.duetKeyA;
+    const outcome = key?.[data.card] as DuetCard | undefined;
+    if (!outcome) throw new Error('Room has no duet board');
+
+    const marks = data.side === 'a' ? ('duetBystandersA' as const) : ('duetBystandersB' as const);
+    // All guards re-checked atomically: a card already agent-covered or already
+    // bystander-marked by this side can't be guessed again (the other side's
+    // marks don't block — that card may even be an assassin for us).
+    const guarded = db
+      .updateTable('room')
+      .where('id', '=', room.id)
+      .where('deal', '=', data.deal)
+      .where('duetStatus', '=', 'playing')
+      .where(sql<boolean>`NOT (${data.card} = ANY(${sql.ref('duetAgents')}))`)
+      .where(sql<boolean>`NOT (${data.card} = ANY(${sql.ref(marks)}))`);
+
+    // SET expressions read the pre-update row, so token spend, sudden-death loss,
+    // and the win check are all atomic without a transaction.
+    const update = match(outcome)
+      .with('agent', () =>
+        guarded.set({
+          duetAgents: sql<number[]>`array_append(${sql.ref('duetAgents')}, ${data.card})`,
+          duetStatus: sql<string>`CASE WHEN cardinality(${sql.ref('duetAgents')}) + 1 >= ${DUET_TOTAL_AGENTS} THEN 'won' ELSE ${sql.ref('duetStatus')} END`,
+        }),
+      )
+      .with('bystander', () => {
+        // With tokens left this spends one; at zero tokens it's a sudden-death loss.
+        const markAppend = sql<
+          number[]
+        >`CASE WHEN ${sql.ref('duetTokens')} > 0 THEN array_append(${sql.ref(marks)}, ${data.card}) ELSE ${sql.ref(marks)} END`;
+        const spendToken = {
+          duetTokens: sql<number>`GREATEST(${sql.ref('duetTokens')} - 1, 0)`,
+          duetStatus: sql<string>`CASE WHEN ${sql.ref('duetTokens')} = 0 THEN 'lost' ELSE ${sql.ref('duetStatus')} END`,
+          duetFatalCard: sql<
+            number | null
+          >`CASE WHEN ${sql.ref('duetTokens')} = 0 THEN ${data.card} ELSE ${sql.ref('duetFatalCard')} END`,
+          duetFatalSide: sql<
+            string | null
+          >`CASE WHEN ${sql.ref('duetTokens')} = 0 THEN ${data.side} ELSE ${sql.ref('duetFatalSide')} END`,
+        };
+        return guarded.set(
+          data.side === 'a'
+            ? { ...spendToken, duetBystandersA: markAppend }
+            : { ...spendToken, duetBystandersB: markAppend },
+        );
+      })
+      .with('assassin', () =>
+        guarded.set({ duetStatus: 'lost', duetFatalCard: data.card, duetFatalSide: data.side }),
+      )
+      .exhaustive();
+
+    const result = await update.returning(DUET_STATE_COLUMNS).executeTakeFirst();
+    if (result) {
+      broadcast(room.id, {
+        type: 'duetUpdate',
+        deal: data.deal,
+        duet: buildDuetPublicState({ ...room, ...result }),
+      });
+    }
+  });
+
+export const endDuetTurn = createServerFn({ method: 'POST' })
+  .validator(z.object({ code: z.string(), deal: z.number().int().min(1) }))
+  .handler(async ({ data }) => {
+    const room = await requireRoomByCode(data.code);
+    if (!(await hasRoomAccess(room, requestHeaders()))) throw new Error('Access denied');
+    if (room.mode !== 'duet') throw new Error('Not a duet room');
+
+    const result = await db
+      .updateTable('room')
+      .set({ duetTokens: sql`${sql.ref('duetTokens')} - 1` })
+      .where('id', '=', room.id)
+      .where('deal', '=', data.deal)
+      .where('duetStatus', '=', 'playing')
+      .where('duetTokens', '>', 0)
+      .returning(DUET_STATE_COLUMNS)
+      .executeTakeFirst();
+
+    if (result) {
+      broadcast(room.id, {
+        type: 'duetUpdate',
+        deal: data.deal,
+        duet: buildDuetPublicState({ ...room, ...result }),
+      });
+    }
+  });
+
+/** Re-deal a room's board (optionally switching mode), bump the deal, and broadcast. */
+async function redealRoom(room: RoomBoardRow & { id: string }, mode: GameMode, union: string[]) {
+  const board = dealGame(mode, union, room);
+  const updated = await db
+    .updateTable('room')
+    .set({ mode, ...board, deal: sql<number>`${sql.ref('deal')} + 1` })
+    .where('id', '=', room.id)
+    .returning('deal')
+    .executeTakeFirstOrThrow();
+
+  const next = { ...room, ...board, mode, deal: updated.deal };
+  broadcast(room.id, (subscriber) => ({
+    type: 'fullState',
+    state: buildGameState(next, subscriber.side),
+  }));
+}
+
 export const newGame = createServerFn({ method: 'POST' })
   .validator(z.object({ code: z.string() }))
   .handler(async ({ data }) => {
@@ -200,37 +331,14 @@ export const newGame = createServerFn({ method: 'POST' })
       .execute();
     const union = requireUnion(buckets);
 
-    const startingTeam: Team = room.startingTeam === 'red' ? 'blue' : 'red';
-    const board = dealBoard(union, startingTeam);
-
-    const updated = await db
-      .updateTable('room')
-      .set({
-        words: board.words,
-        categories: board.categories,
-        startingTeam,
-        revealed: [],
-        deal: sql<number>`${sql.ref('deal')} + 1`,
-      })
-      .where('id', '=', room.id)
-      .returning('deal')
-      .executeTakeFirstOrThrow();
-
-    broadcast(room.id, {
-      type: 'fullState',
-      deal: updated.deal,
-      startingTeam,
-      words: board.words,
-      categories: board.categories,
-      revealed: [],
-    });
+    await redealRoom(room, room.mode as GameMode, union);
   });
 
 export const getUserRooms = createServerFn().handler(async () => {
   const user = await requireUser();
   const rooms = await db
     .selectFrom('room')
-    .select(['id', 'code', 'passwordHash', 'deal', 'createdAt'])
+    .select(['id', 'code', 'passwordHash', 'deal', 'mode', 'createdAt'])
     .where('ownerId', '=', user.id)
     .orderBy('createdAt', 'desc')
     .execute();
@@ -254,6 +362,7 @@ export const getUserRooms = createServerFn().handler(async () => {
     code: room.code,
     hasPassword: room.passwordHash !== null,
     deal: room.deal,
+    mode: room.mode as GameMode,
     buckets: buckets
       .filter((bucket) => bucket.roomId === room.id)
       .map((bucket) => ({ id: bucket.bucketId, name: bucket.name })),
@@ -265,6 +374,7 @@ export const updateRoomSettings = createServerFn({ method: 'POST' })
     z.object({
       roomId: z.string(),
       bucketIds: z.array(z.string()).min(1),
+      mode: GameModeSchema,
       password: z.discriminatedUnion('action', [
         z.object({ action: z.literal('keep') }),
         z.object({ action: z.literal('remove') }),
@@ -284,13 +394,18 @@ export const updateRoomSettings = createServerFn({ method: 'POST' })
 
     await ensureSystemBuckets();
     const buckets = await getVisibleBuckets(data.bucketIds, user.id);
-    requireUnion(buckets);
+    const union = requireUnion(buckets);
 
     await db.deleteFrom('room_bucket').where('roomId', '=', room.id).execute();
     await db
       .insertInto('room_bucket')
       .values(data.bucketIds.map((bucketId) => ({ roomId: room.id, bucketId })))
       .execute();
+
+    // Switching modes deals a fresh board for the new mode (from the new buckets).
+    if (data.mode !== room.mode) {
+      await redealRoom(room, data.mode, union);
+    }
 
     if (data.password.action === 'set') {
       // Bumping passwordGeneration invalidates every outstanding access grant.

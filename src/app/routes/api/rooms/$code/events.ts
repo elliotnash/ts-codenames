@@ -1,8 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { db } from '~/lib/db';
+import { buildGameState } from '~/lib/game-state';
 import { hasRoomAccess } from '~/lib/room-access';
-import type { Category, Team } from '~/lib/room-events';
-import { send, sendPing, subscribe, unsubscribe } from '~/lib/room-state';
+import { DuetSideSchema } from '~/lib/room-events';
+import { send, sendPing, subscribe, type Subscriber, unsubscribe } from '~/lib/room-state';
 
 export const Route = createFileRoute('/api/rooms/$code/events')({
   server: {
@@ -17,21 +18,18 @@ export const Route = createFileRoute('/api/rooms/$code/events')({
         if (!(await hasRoomAccess(room, request.headers))) {
           return new Response('Forbidden', { status: 403 });
         }
+        // The subscriber's declared duet side; personalizes fullState events.
+        const side = DuetSideSchema.nullable()
+          .catch(null)
+          .parse(new URL(request.url).searchParams.get('side'));
 
-        let controller: ReadableStreamDefaultController;
+        let subscriber: Subscriber;
         let heartbeat: ReturnType<typeof setInterval>;
         const stream = new ReadableStream({
           start(c) {
-            controller = c;
-            subscribe(room.id, c);
-            send(c, {
-              type: 'fullState',
-              deal: room.deal,
-              startingTeam: room.startingTeam as Team,
-              words: room.words,
-              categories: room.categories as Category[],
-              revealed: room.revealed,
-            });
+            subscriber = { controller: c, side };
+            subscribe(room.id, subscriber);
+            send(c, { type: 'fullState', state: buildGameState(room, side) });
             heartbeat = setInterval(() => {
               try {
                 sendPing(c);
@@ -42,7 +40,7 @@ export const Route = createFileRoute('/api/rooms/$code/events')({
           },
           cancel() {
             clearInterval(heartbeat);
-            unsubscribe(room.id, controller);
+            unsubscribe(room.id, subscriber);
           },
         });
         return new Response(stream, {

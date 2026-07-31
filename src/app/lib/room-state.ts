@@ -1,28 +1,34 @@
-import type { ServerEvent } from '~/lib/room-events';
+import type { DuetSide, ServerEvent } from '~/lib/room-events';
 
 // Per-room SSE stream registries (server-only). The database is the source of
 // truth for board state; these streams just push updates to connected clients.
-const rooms = new Map<string, Set<ReadableStreamDefaultController>>();
+export type Subscriber = {
+  controller: ReadableStreamDefaultController;
+  // Declared duet side, if any — personalizes fullState events (own key only).
+  side: DuetSide | null;
+};
+
+const rooms = new Map<string, Set<Subscriber>>();
 const encoder = new TextEncoder();
 
 function encode(event: ServerEvent) {
   return encoder.encode(`data: ${JSON.stringify(event)}\n\n`);
 }
 
-export function subscribe(roomId: string, controller: ReadableStreamDefaultController) {
-  let controllers = rooms.get(roomId);
-  if (!controllers) {
-    controllers = new Set();
-    rooms.set(roomId, controllers);
+export function subscribe(roomId: string, subscriber: Subscriber) {
+  let subscribers = rooms.get(roomId);
+  if (!subscribers) {
+    subscribers = new Set();
+    rooms.set(roomId, subscribers);
   }
-  controllers.add(controller);
+  subscribers.add(subscriber);
 }
 
-export function unsubscribe(roomId: string, controller: ReadableStreamDefaultController) {
-  const controllers = rooms.get(roomId);
-  if (!controllers) return;
-  controllers.delete(controller);
-  if (controllers.size === 0) rooms.delete(roomId);
+export function unsubscribe(roomId: string, subscriber: Subscriber) {
+  const subscribers = rooms.get(roomId);
+  if (!subscribers) return;
+  subscribers.delete(subscriber);
+  if (subscribers.size === 0) rooms.delete(roomId);
 }
 
 /** Send an event to a single stream (e.g. the initial snapshot). */
@@ -35,28 +41,51 @@ export function sendPing(controller: ReadableStreamDefaultController) {
   controller.enqueue(encoder.encode(': ping\n\n'));
 }
 
-export function broadcast(roomId: string, event: ServerEvent) {
-  const controllers = rooms.get(roomId);
-  if (!controllers) return;
-  const chunk = encode(event);
-  for (const controller of controllers) {
+/** Broadcast an event; pass a builder to personalize it per subscriber (duet keys). */
+export function broadcast(
+  roomId: string,
+  event: ServerEvent | ((subscriber: Subscriber) => ServerEvent),
+) {
+  const subscribers = rooms.get(roomId);
+  if (!subscribers) return;
+
+  if (typeof event !== 'function') {
+    const chunk = encode(event);
+    for (const subscriber of subscribers) {
+      try {
+        subscriber.controller.enqueue(chunk);
+      } catch {
+        subscribers.delete(subscriber);
+      }
+    }
+    return;
+  }
+
+  // Personalized events differ only by side, so at most three encodings.
+  const sideChunks = new Map<DuetSide | null, Uint8Array>();
+  for (const subscriber of subscribers) {
+    let chunk = sideChunks.get(subscriber.side);
+    if (!chunk) {
+      chunk = encode(event(subscriber));
+      sideChunks.set(subscriber.side, chunk);
+    }
     try {
-      controller.enqueue(chunk);
+      subscriber.controller.enqueue(chunk);
     } catch {
-      controllers.delete(controller);
+      subscribers.delete(subscriber);
     }
   }
 }
 
 /** Notify all of a deleted room's clients and close their streams. */
 export function closeRoom(roomId: string) {
-  const controllers = rooms.get(roomId);
-  if (!controllers) return;
+  const subscribers = rooms.get(roomId);
+  if (!subscribers) return;
   const chunk = encode({ type: 'roomDeleted' });
-  for (const controller of controllers) {
+  for (const subscriber of subscribers) {
     try {
-      controller.enqueue(chunk);
-      controller.close();
+      subscriber.controller.enqueue(chunk);
+      subscriber.controller.close();
     } catch {
       // stream already dead
     }
