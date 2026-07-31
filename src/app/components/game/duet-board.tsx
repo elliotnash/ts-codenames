@@ -2,6 +2,7 @@ import { cva } from 'class-variance-authority';
 import { ArrowLeftRight, Hourglass, LoaderIcon, Skull } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { FlipCard, cardBaseStyle } from '~/components/game/flip-card';
+import { AnimatePresence, dealHidden, dealShown, dealTransition, m } from '~/components/motion';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
@@ -96,7 +97,12 @@ export function DuetBoard({
 
   return (
     <div className="grow flex justify-center flex-col m-auto w-full px-6 max-w-4xl max-h-full">
-      <div className="flex justify-between items-center gap-3 flex-wrap w-full mb-6 px-4">
+      <m.div
+        initial={dealHidden}
+        animate={dealShown}
+        transition={dealTransition()}
+        className="flex justify-between items-center gap-3 flex-wrap w-full mb-6 px-4"
+      >
         <div className="flex items-center gap-3">
           <Badge variant="secondary" className="text-card-agent">
             Agents: {duet.agents.length}/{DUET_TOTAL_AGENTS}
@@ -124,60 +130,94 @@ export function DuetBoard({
             </Button>
           )}
         </div>
-      </div>
+      </m.div>
 
       {suddenDeath && (
-        <div className="mb-6 mx-4 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-sm px-4 py-2 text-center">
+        <m.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 mx-4 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-sm px-4 py-2 text-center"
+        >
           Sudden death — no more clues. Any wrong guess loses the game.
-        </div>
+        </m.div>
       )}
 
       <div className="grid grid-cols-5 gap-4 w-full px-4">
         {state.words.map((word, i) => (
-          <DuetGameCard
+          <m.div
             key={`${state.deal}-${word}`}
-            word={word}
-            ownCard={ownKey[i]!}
-            flipCategory={
-              agents.has(i)
-                ? 'agent'
-                : duet.status === 'lost' && duet.fatalCard === i
-                  ? fatalIdentity === 'assassin'
-                    ? 'death'
-                    : 'bystander'
-                  : marksA.has(i) && marksB.has(i)
-                    ? 'bystander'
-                    : null
-            }
-            marks={{ a: marksA.has(i), b: marksB.has(i) }}
-            pending={pending === i}
-            keyPair={duet.keyA && duet.keyB ? [duet.keyA[i]!, duet.keyB[i]!] : null}
-            onClick={() => handleGuess(i)}
-          />
+            initial={dealHidden}
+            animate={dealShown}
+            transition={dealTransition(i)}
+          >
+            <DuetGameCard
+              word={word}
+              ownCard={ownKey[i]!}
+              flipCategory={
+                agents.has(i)
+                  ? 'agent'
+                  : duet.status === 'lost' && duet.fatalCard === i
+                    ? fatalIdentity === 'assassin'
+                      ? 'death'
+                      : 'bystander'
+                    : marksA.has(i) && marksB.has(i)
+                      ? 'bystander'
+                      : null
+              }
+              marks={{ a: marksA.has(i), b: marksB.has(i) }}
+              pending={pending === i}
+              keyPair={duet.keyA && duet.keyB ? [duet.keyA[i]!, duet.keyB[i]!] : null}
+              onClick={() => handleGuess(i)}
+            />
+          </m.div>
         ))}
       </div>
 
-      {gameOver && !resultDismissed && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm p-6">
-          <Card className="w-full max-w-md text-center">
-            <CardHeader>
-              <CardTitle className="text-2xl">
-                {duet.status === 'won' ? 'Mission complete' : 'Mission failed'}
-              </CardTitle>
-              <CardDescription className="text-balance">{resultMessage}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-center gap-2">
-              <Button onClick={handleNewGame} disabled={dealing}>
-                {dealing && <LoaderIcon className="animate-spin-slow" />}
-                New Game
-              </Button>
-              <Button variant="outline" onClick={() => setResultDismissed(true)}>
-                View Board
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      <AnimatePresence>
+        {gameOver && !resultDismissed && (
+          <m.div
+            key="result"
+            initial={{ opacity: 0 }}
+            // Hold the backdrop briefly so the fatal card's flip reads first.
+            animate={{ opacity: 1, transition: { delay: 0.5 } }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm p-6"
+          >
+            <m.div
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                y: 0,
+                transition: { delay: 0.5, type: 'spring', bounce: 0.3, duration: 0.5 },
+              }}
+              exit={{ opacity: 0, scale: 0.97 }}
+              className="w-full max-w-md"
+            >
+              <Card className="text-center">
+                <CardHeader>
+                  <p className="font-mono text-xs uppercase tracking-widest text-primary">
+                    {'// Debrief'}
+                  </p>
+                  <CardTitle className="font-display text-3xl font-bold uppercase tracking-wide">
+                    {duet.status === 'won' ? 'Mission complete' : 'Mission failed'}
+                  </CardTitle>
+                  <CardDescription className="text-balance">{resultMessage}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-center gap-2">
+                  <Button onClick={handleNewGame} disabled={dealing}>
+                    {dealing && <LoaderIcon className="animate-spin-slow" />}
+                    New Game
+                  </Button>
+                  <Button variant="outline" onClick={() => setResultDismissed(true)}>
+                    View Board
+                  </Button>
+                </CardContent>
+              </Card>
+            </m.div>
+          </m.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

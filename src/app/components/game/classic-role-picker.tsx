@@ -1,3 +1,4 @@
+import { m, riseItem, staggerParent } from '~/components/motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import type { ClassicRole } from '~/lib/room-view-cookies';
 import { cn } from '~/lib/utils';
@@ -38,29 +39,44 @@ function RoleMotif({ role }: { role: ClassicRole }) {
 export function ClassicRolePicker({ onPick }: { onPick: (role: ClassicRole) => void }) {
   return (
     <div className="grow flex items-center justify-center p-6">
-      <Card className="w-full max-w-lg backdrop-blur-sm bg-card/25">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Choose your role</CardTitle>
-          <CardDescription className="text-balance">
-            Spymasters see which team every card belongs to and give the clues. Operatives only see
-            what's been revealed — no peeking!
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4">
-          {(['operative', 'spymaster'] as const).map((role) => (
-            <button
-              key={role}
-              type="button"
-              onClick={() => onPick(role)}
-              className="group flex flex-col items-center gap-3 rounded-lg border bg-card/40 p-6 cursor-pointer transition-all duration-200 hover:border-primary hover:bg-primary/5 hover:scale-[1.03] active:scale-[0.99]"
+      <m.div variants={staggerParent} initial="hidden" animate="show" className="w-full max-w-lg">
+        <Card className="backdrop-blur-sm bg-card/25">
+          <CardHeader className="text-center">
+            <m.p
+              variants={riseItem}
+              className="font-mono text-xs uppercase tracking-widest text-primary"
             >
-              <RoleMotif role={role} />
-              <span className="font-semibold">{ROLE_INFO[role].label}</span>
-              <span className="text-xs text-muted-foreground">{ROLE_INFO[role].caption}</span>
-            </button>
-          ))}
-        </CardContent>
-      </Card>
+              {'// Field assignment'}
+            </m.p>
+            <m.div variants={riseItem}>
+              <CardTitle className="font-display text-3xl font-bold uppercase tracking-wide">
+                Choose your role
+              </CardTitle>
+            </m.div>
+            <m.div variants={riseItem}>
+              <CardDescription className="text-balance">
+                Spymasters see which team every card belongs to and give the clues. Operatives only
+                see what's been revealed — no peeking!
+              </CardDescription>
+            </m.div>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            {(['operative', 'spymaster'] as const).map((role) => (
+              <m.button
+                variants={riseItem}
+                key={role}
+                type="button"
+                onClick={() => onPick(role)}
+                className="group flex flex-col items-center gap-3 rounded-lg border bg-card/40 p-6 cursor-pointer transition-all duration-200 hover:border-primary hover:bg-primary/5 hover:scale-[1.03] active:scale-[0.99]"
+              >
+                <RoleMotif role={role} />
+                <span className="font-semibold">{ROLE_INFO[role].label}</span>
+                <span className="text-xs text-muted-foreground">{ROLE_INFO[role].caption}</span>
+              </m.button>
+            ))}
+          </CardContent>
+        </Card>
+      </m.div>
     </div>
   );
 }

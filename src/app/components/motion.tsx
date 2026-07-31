@@ -26,3 +26,14 @@ export const riseItem: Variants = {
 };
 
 export const viewportOnce = { once: true, amount: 0.3 } as const;
+
+/* Deal-cascade helpers for the game boards: a per-card mount entrance keyed by
+   `${deal}-${word}`, so every new deal replays the cascade. Animates only the
+   wrapper (opacity/y) — never the FlipCard itself, whose CSS flip must stay
+   independent. */
+export const dealHidden = { opacity: 0, y: 10 };
+export const dealShown = { opacity: 1, y: 0 };
+const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
+export function dealTransition(index = 0) {
+  return { duration: 0.35, ease: EASE_OUT, delay: index * 0.02 };
+}

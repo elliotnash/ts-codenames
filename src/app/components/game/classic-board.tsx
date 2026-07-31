@@ -2,6 +2,7 @@ import { cva } from 'class-variance-authority';
 import { ArrowLeftRight, Skull } from 'lucide-react';
 import { useMemo } from 'react';
 import { FlipCard, cardBaseStyle } from '~/components/game/flip-card';
+import { dealHidden, dealShown, dealTransition, m } from '~/components/motion';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
@@ -65,7 +66,12 @@ export function ClassicBoard({
 
   return (
     <div className="grow flex justify-center flex-col m-auto w-full px-6 max-w-4xl max-h-full">
-      <div className="flex justify-between w-full mb-6 px-4">
+      <m.div
+        initial={dealHidden}
+        animate={dealShown}
+        transition={dealTransition()}
+        className="flex justify-between w-full mb-6 px-4"
+      >
         <div className="flex items-center space-x-4">
           {state.startingTeam === 'red' ? scoreBadges : scoreBadges.reverse()}
         </div>
@@ -75,19 +81,25 @@ export function ClassicBoard({
             <ArrowLeftRight /> Switch role
           </Button>
         </div>
-      </div>
+      </m.div>
 
       <div className="grid grid-cols-5 gap-4 w-full px-4">
         {words.map((word, i) => (
-          <GameCard
-            onClick={() => handleReveal(i)}
-            category={categories[i]!}
+          <m.div
             key={`${state.deal}-${word}`}
-            spymaster={isSpymaster}
-            revealed={revealed.has(i)}
+            initial={dealHidden}
+            animate={dealShown}
+            transition={dealTransition(i)}
           >
-            {word}
-          </GameCard>
+            <GameCard
+              onClick={() => handleReveal(i)}
+              category={categories[i]!}
+              spymaster={isSpymaster}
+              revealed={revealed.has(i)}
+            >
+              {word}
+            </GameCard>
+          </m.div>
         ))}
       </div>
     </div>

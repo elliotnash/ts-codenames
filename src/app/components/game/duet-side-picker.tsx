@@ -1,3 +1,4 @@
+import { m, riseItem, staggerParent } from '~/components/motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { DUET_TOKENS, DUET_TOTAL_AGENTS } from '~/lib/modes';
 import type { DuetPublicState, DuetSide } from '~/lib/room-events';
@@ -43,38 +44,53 @@ export function DuetSidePicker({
 
   return (
     <div className="grow flex items-center justify-center p-6">
-      <Card className="w-full max-w-lg backdrop-blur-sm bg-card/25">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Choose your side</CardTitle>
-          <CardDescription className="text-balance">
-            Both players see the same words but different halves of the key card. Several people can
-            share a side — everyone on it sees the same key.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            {(['a', 'b'] as const).map((side) => (
-              <button
-                key={side}
-                type="button"
-                onClick={() => onPick(side)}
-                className="group flex flex-col items-center gap-3 rounded-lg border bg-card/40 p-6 cursor-pointer transition-all duration-200 hover:border-primary hover:bg-primary/5 hover:scale-[1.03] active:scale-[0.99]"
-              >
-                <KeyMotif side={side} />
-                <span className="font-semibold">Player {side.toUpperCase()}</span>
-                <span className="text-xs text-muted-foreground">9 agents · 3 assassins</span>
-              </button>
-            ))}
-          </div>
-          <p className="text-center text-xs text-muted-foreground">
-            {duet.status !== 'playing'
-              ? 'The last mission is over — pick a side to see how it ended.'
-              : fresh
-                ? `A fresh mission: find all ${DUET_TOTAL_AGENTS} agents within ${DUET_TOKENS} turns.`
-                : `Mission in progress — ${duet.agents.length}/${DUET_TOTAL_AGENTS} agents found, ${duet.tokens} ${duet.tokens === 1 ? 'turn' : 'turns'} left.`}
-          </p>
-        </CardContent>
-      </Card>
+      <m.div variants={staggerParent} initial="hidden" animate="show" className="w-full max-w-lg">
+        <Card className="backdrop-blur-sm bg-card/25">
+          <CardHeader className="text-center">
+            <m.p
+              variants={riseItem}
+              className="font-mono text-xs uppercase tracking-widest text-primary"
+            >
+              {'// Key assignment'}
+            </m.p>
+            <m.div variants={riseItem}>
+              <CardTitle className="font-display text-3xl font-bold uppercase tracking-wide">
+                Choose your side
+              </CardTitle>
+            </m.div>
+            <m.div variants={riseItem}>
+              <CardDescription className="text-balance">
+                Both players see the same words but different halves of the key card. Several people
+                can share a side — everyone on it sees the same key.
+              </CardDescription>
+            </m.div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              {(['a', 'b'] as const).map((side) => (
+                <m.button
+                  variants={riseItem}
+                  key={side}
+                  type="button"
+                  onClick={() => onPick(side)}
+                  className="group flex flex-col items-center gap-3 rounded-lg border bg-card/40 p-6 cursor-pointer transition-all duration-200 hover:border-primary hover:bg-primary/5 hover:scale-[1.03] active:scale-[0.99]"
+                >
+                  <KeyMotif side={side} />
+                  <span className="font-semibold">Player {side.toUpperCase()}</span>
+                  <span className="text-xs text-muted-foreground">9 agents · 3 assassins</span>
+                </m.button>
+              ))}
+            </div>
+            <m.p variants={riseItem} className="text-center text-xs text-muted-foreground">
+              {duet.status !== 'playing'
+                ? 'The last mission is over — pick a side to see how it ended.'
+                : fresh
+                  ? `A fresh mission: find all ${DUET_TOTAL_AGENTS} agents within ${DUET_TOKENS} turns.`
+                  : `Mission in progress — ${duet.agents.length}/${DUET_TOTAL_AGENTS} agents found, ${duet.tokens} ${duet.tokens === 1 ? 'turn' : 'turns'} left.`}
+            </m.p>
+          </CardContent>
+        </Card>
+      </m.div>
     </div>
   );
 }
