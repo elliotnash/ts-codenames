@@ -15,7 +15,7 @@ import { getRoom, newGame, submitRoomPassword } from '~/functions/rooms';
 import { useDuetSide } from '~/hooks/use-duet-side';
 import { useRoomStream } from '~/hooks/use-room-stream';
 import { useToast } from '~/hooks/use-toast';
-import type { GameState } from '~/lib/room-events';
+import type { DuetSide, GameState } from '~/lib/room-events';
 
 export const Route = createFileRoute('/game/$code')({
   loader: ({ params }) => getRoom({ data: { code: params.code } }),
@@ -34,7 +34,7 @@ function GamePage() {
   if (data.status === 'needsPassword') {
     return <PasswordGate code={data.code} />;
   }
-  return <GameRoom key={data.room.code} code={data.room.code} initial={data.room.state} />;
+  return <GameRoom key={data.room.code} code={data.room.code} initial={data.room} />;
 }
 
 function MessageCard({
@@ -124,13 +124,19 @@ function PasswordGate({ code }: { code: string }) {
   );
 }
 
-function GameRoom({ code, initial }: { code: string; initial: GameState }) {
+function GameRoom({
+  code,
+  initial,
+}: {
+  code: string;
+  initial: { state: GameState; duetSide: DuetSide | null };
+}) {
   const { toast } = useToast();
-  const [state, setState] = useState<GameState>(initial);
+  const [state, setState] = useState<GameState>(initial.state);
   const [roomDeleted, setRoomDeleted] = useState(false);
-  // The stored side always rides on the stream URL (even for classic rooms), so
-  // a live switch to duet delivers this viewer's key without a reconnect dance.
-  const [side, setSide] = useDuetSide(code);
+  // The declared side always rides on the stream URL (even for classic rooms),
+  // so a live switch to duet delivers this viewer's key without a reconnect dance.
+  const [side, setSide] = useDuetSide(code, initial.duetSide);
 
   useRoomStream(code, side, !roomDeleted, (event) => {
     match(event)

@@ -5,6 +5,7 @@ import { match } from 'ts-pattern';
 import { z } from 'zod';
 import { db } from '~/lib/db';
 import { BOARD_SIZE, unionBucketWords } from '~/lib/deal';
+import { duetSideFromHeaders } from '~/lib/duet-side';
 import { type RoomBoardRow, buildDuetPublicState, buildGameState } from '~/lib/game-state';
 import { DUET_TOTAL_AGENTS, dealGame } from '~/lib/modes';
 import {
@@ -144,12 +145,16 @@ export const getRoom = createServerFn()
       .where('roomId', '=', room.id)
       .execute();
 
+    // The viewer's declared side comes from a per-room cookie, so SSR renders
+    // the right duet view (with that side's key) instead of flashing the picker.
+    const duetSide = duetSideFromHeaders(requestHeaders(), room.code);
+
     return {
       status: 'ok' as const,
       room: {
         code: room.code,
-        // No side is known here, so a live duet key is never included.
-        state: buildGameState(room, null),
+        duetSide,
+        state: buildGameState(room, duetSide),
         isOwner: user?.id === room.ownerId,
         hasPassword: room.passwordHash !== null,
         bucketIds: bucketRows.map((row) => row.bucketId),
