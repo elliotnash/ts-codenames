@@ -18,6 +18,8 @@ export const tileVariants = cva('', {
   },
 });
 
+export type TileVariant = NonNullable<VariantProps<typeof tileVariants>['variant']>;
+
 const tileBaseStyle = 'aspect-[4/3] flex items-center justify-center select-none transition-all';
 
 export function DemoTile({
@@ -31,7 +33,7 @@ export function DemoTile({
 }: {
   word?: string;
   children?: React.ReactNode;
-  variant: NonNullable<VariantProps<typeof tileVariants>['variant']>;
+  variant: TileVariant;
   flipped: boolean;
   onClick?: () => void;
   className?: string;
