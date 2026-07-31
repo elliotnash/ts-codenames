@@ -2,6 +2,9 @@ import { createFileRoute, redirect, useRouter } from '@tanstack/react-router';
 import { LoaderIcon, MoreHorizontalIcon } from 'lucide-react';
 import { useState } from 'react';
 import { GridBG } from '~/components/background';
+import { MotionProvider, m, riseItem, staggerParent } from '~/components/motion';
+import { PageHeading } from '~/components/page-heading';
+import { SiteHeader } from '~/components/site-header';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,7 +33,6 @@ import {
   TableHeader,
   TableRow,
 } from '~/components/ui/table';
-import { UserMenu } from '~/components/user-menu';
 import {
   adminDeleteUser,
   adminDisableTwoFactor,
@@ -52,6 +54,7 @@ export const Route = createFileRoute('/admin')({
     }
   },
   loader: () => getAdminUsers(),
+  head: () => ({ meta: [{ title: 'Admin — Codenames' }] }),
   component: RouteComponent,
 });
 
@@ -67,50 +70,52 @@ function RouteComponent() {
   const users = Route.useLoaderData();
 
   return (
-    <main className="container min-h-screen w-full flex flex-col p-0">
-      <GridBG />
-      <div className="min-h-screen">
-        <header className="sticky top-0 z-40 w-full border-b backdrop-blur-md">
-          <div className="container flex h-16 items-center justify-between px-4">
-            <h1 className="text-2xl font-bold">Admin</h1>
-            <UserMenu className="bg-card/25" />
-          </div>
-        </header>
-        <main className="container px-4 py-8 space-y-6">
-          <Card className="backdrop-blur-sm bg-card/25">
-            <CardHeader>
-              <CardTitle className="text-xl">Users</CardTitle>
-              <CardDescription>
-                All registered accounts. Storage approximates the size of each user's rooms and
-                word buckets.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>2FA</TableHead>
-                    <TableHead className="text-right">Rooms</TableHead>
-                    <TableHead className="text-right">Buckets</TableHead>
-                    <TableHead className="text-right">Storage</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead className="w-10" />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((user) => (
-                    <UserRow key={user.id} user={user} />
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+    <MotionProvider>
+      <div className="min-h-screen flex flex-col">
+        <GridBG />
+        <SiteHeader sticky />
+        <main className="container mx-auto w-full px-4 py-8">
+          <m.div variants={staggerParent} initial="hidden" animate="show" className="space-y-6">
+            <PageHeading eyebrow="// Command" title="Admin" />
+            <m.div variants={riseItem}>
+              <Card className="backdrop-blur-sm bg-card/25">
+                <CardHeader>
+                  <CardTitle className="text-xl font-display font-bold uppercase tracking-wide">
+                    Users
+                  </CardTitle>
+                  <CardDescription>
+                    All registered accounts. Storage approximates the size of each user's rooms and
+                    word buckets.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Role</TableHead>
+                        <TableHead>2FA</TableHead>
+                        <TableHead className="text-right">Rooms</TableHead>
+                        <TableHead className="text-right">Buckets</TableHead>
+                        <TableHead className="text-right">Storage</TableHead>
+                        <TableHead>Created</TableHead>
+                        <TableHead className="w-10" />
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {users.map((user) => (
+                        <UserRow key={user.id} user={user} />
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </m.div>
+          </m.div>
         </main>
       </div>
-    </main>
+    </MotionProvider>
   );
 }
 
