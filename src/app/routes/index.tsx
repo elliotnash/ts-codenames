@@ -17,8 +17,7 @@ export const Route = createFileRoute('/')({
 });
 
 // Fixed demo board: spy-flavored words over a plausible classic key (9r/8b/7 bystanders/1 death).
-const HERO_WORDS =
-  `berlin shadow cipher night angel crown satellite piano ghost opera needle paris whale
+const HERO_WORDS = `berlin shadow cipher night angel crown satellite piano ghost opera needle paris whale
    contact mole ice theater falcon train mirror vault storm dragon key agent`.split(/\s+/);
 const HERO_KEY = 'r b y r b y r r b y b r k b y r b r y b r y b r y'
   .split(' ')

@@ -59,7 +59,10 @@ export function NotFoundPage() {
             This page isn't on the board.
           </p>
         </div>
-        <div className={`flex flex-wrap justify-center gap-3 ${rise}`} style={{ animationDelay: '0.3s' }}>
+        <div
+          className={`flex flex-wrap justify-center gap-3 ${rise}`}
+          style={{ animationDelay: '0.3s' }}
+        >
           <Button asChild>
             <Link to="/">Back to home</Link>
           </Button>

@@ -108,7 +108,10 @@ const TRY_TILES: { word: string; variant: TileVariant }[] = [
 function TryItRow() {
   const [flipped, setFlipped] = useState<ReadonlySet<number>>(new Set());
   return (
-    <m.div variants={riseItem} className="space-y-3 rounded-lg border bg-card/25 p-4 backdrop-blur-sm">
+    <m.div
+      variants={riseItem}
+      className="space-y-3 rounded-lg border bg-card/25 p-4 backdrop-blur-sm"
+    >
       <div className="flex items-center gap-3">
         <ClueChip>NIGHT · 2</ClueChip>
         <span className="text-sm text-muted-foreground">Try it — tap a tile.</span>
@@ -282,7 +285,10 @@ function RouteComponent() {
             viewport={viewportOnce}
             className="space-y-4"
           >
-            <m.p variants={riseItem} className="font-mono text-xs uppercase tracking-widest text-primary">
+            <m.p
+              variants={riseItem}
+              className="font-mono text-xs uppercase tracking-widest text-primary"
+            >
               {'// Ready for the field?'}
             </m.p>
             <m.div variants={riseItem} className="flex flex-wrap gap-3">

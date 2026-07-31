@@ -105,7 +105,10 @@ export function TokenDots({ total, spent }: { total: number; spent: number }) {
         <div
           // biome-ignore lint/suspicious/noArrayIndexKey: fixed-size static list
           key={i}
-          className={cn('size-2.5 rounded-full', i < total - spent ? 'bg-primary' : 'bg-primary/20')}
+          className={cn(
+            'size-2.5 rounded-full',
+            i < total - spent ? 'bg-primary' : 'bg-primary/20',
+          )}
         />
       ))}
     </div>
