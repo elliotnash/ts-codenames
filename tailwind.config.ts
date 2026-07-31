@@ -35,6 +35,10 @@ const config = {
           DEFAULT: 'hsl(var(--card-death))',
           foreground: 'hsl(var(--card-death-foreground))',
         },
+        'card-agent': {
+          DEFAULT: 'hsl(var(--card-agent))',
+          foreground: 'hsl(var(--card-agent-foreground))',
+        },
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
