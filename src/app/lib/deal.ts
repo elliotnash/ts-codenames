@@ -19,12 +19,17 @@ export function unionBucketWords(buckets: { words: string[] }[]): string[] {
   return union;
 }
 
-/** Deal a fresh board: 1 death, 9 for the starting team, 8 for the other, 7 bystanders. */
-export function dealBoard(unionWords: string[], startingTeam: Team) {
+/** Draw the 25 board words from a bucket union. */
+export function drawBoardWords(unionWords: string[]): string[] {
   if (unionWords.length < BOARD_SIZE) {
     throw new Error(`Need at least ${BOARD_SIZE} words to deal a board`);
   }
-  const words = shuffleArray(unionWords.slice()).slice(0, BOARD_SIZE);
+  return shuffleArray(unionWords.slice()).slice(0, BOARD_SIZE);
+}
+
+/** Deal a fresh classic board: 1 death, 9 for the starting team, 8 for the other, 7 bystanders. */
+export function dealBoard(unionWords: string[], startingTeam: Team) {
+  const words = drawBoardWords(unionWords);
   const otherTeam: Team = startingTeam === 'red' ? 'blue' : 'red';
   const categories: Category[] = shuffleArray([
     'death',
