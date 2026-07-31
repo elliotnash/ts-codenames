@@ -105,12 +105,12 @@ function RouteComponent() {
 
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <Label>Game Mode</Label>
+            <Label className="block pb-1">Game Mode</Label>
             <GameModeSelector value={mode} onChange={setMode} />
           </div>
 
           <div className="space-y-2">
-            <Label>Word Buckets</Label>
+            <Label className="block pb-1">Word Buckets</Label>
             <div className="rounded-md border bg-card/25 backdrop-blur-sm divide-y max-h-64 overflow-y-auto">
               {buckets.map((bucket) => (
                 <label
@@ -146,7 +146,9 @@ function RouteComponent() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="room-code">Room Code (optional)</Label>
+            <Label htmlFor="room-code" className="block pb-1">
+              Room Code (optional)
+            </Label>
             <div className="relative">
               <Input
                 id="room-code"
@@ -176,7 +178,9 @@ function RouteComponent() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="room-password">Password (optional)</Label>
+            <Label htmlFor="room-password" className="block pb-1">
+              Password (optional)
+            </Label>
             <Input
               id="room-password"
               type="password"

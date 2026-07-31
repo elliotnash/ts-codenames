@@ -130,7 +130,7 @@ export function RoomSettingsDialog({
         </DialogHeader>
 
         <div className="space-y-2">
-          <Label>Game Mode</Label>
+          <Label className="block pb-1">Game Mode</Label>
           <GameModeSelector value={mode} onChange={setMode} />
           {mode !== room.mode && (
             <p className="text-xs text-destructive">
@@ -140,7 +140,7 @@ export function RoomSettingsDialog({
         </div>
 
         <div className="space-y-2">
-          <Label>Word Buckets</Label>
+          <Label className="block pb-1">Word Buckets</Label>
           <div className="rounded-md border divide-y max-h-52 overflow-y-auto">
             {buckets.map((bucket) => (
               <label
