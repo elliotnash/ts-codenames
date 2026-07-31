@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect, useRouter } from '@tanstack/react-router';
+import { Link, createFileRoute, redirect, useRouter } from '@tanstack/react-router';
 import {
   Clipboard,
   Download,
@@ -28,18 +28,13 @@ import {
 } from '~/components/ui/alert-dialog';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { UserMenu } from '~/components/user-menu';
 import { deleteBucket, getBuckets } from '~/functions/buckets';
 import { deleteRoom, getUserRooms, newGame } from '~/functions/rooms';
 import { useAuthOptions } from '~/hooks/use-auth';
 import { useToast } from '~/hooks/use-toast';
+import { MODE_INFO } from '~/lib/modes';
 
 export const Route = createFileRoute('/dashboard')({
   beforeLoad: async ({ context: { queryClient }, location }) => {
@@ -182,8 +177,11 @@ function RouteComponent() {
                         </AlertDialog>
                       </span>
                     </CardTitle>
-                    <CardDescription>
-                      Game {room.deal} · {room.buckets.map((bucket) => bucket.name).join(', ')}
+                    <CardDescription className="flex items-center gap-2">
+                      <Badge variant="secondary">{MODE_INFO[room.mode].label}</Badge>
+                      <span>
+                        Game {room.deal} · {room.buckets.map((bucket) => bucket.name).join(', ')}
+                      </span>
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="flex flex-wrap gap-2">
@@ -303,8 +301,7 @@ function RouteComponent() {
                             <AlertDialogTitle>Delete {bucket.name}?</AlertDialogTitle>
                             <AlertDialogDescription>
                               Rooms using this bucket keep their current board, but new games will
-                              need enough words from their remaining buckets. This cannot be
-                              undone.
+                              need enough words from their remaining buckets. This cannot be undone.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>

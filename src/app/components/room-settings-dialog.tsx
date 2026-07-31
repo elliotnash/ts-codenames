@@ -1,6 +1,17 @@
 import { useRouter } from '@tanstack/react-router';
 import { LoaderIcon, Settings } from 'lucide-react';
 import { useState } from 'react';
+import { GameModeSelector } from '~/components/game-mode-selector';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '~/components/ui/alert-dialog';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Checkbox } from '~/components/ui/checkbox';
@@ -20,12 +31,20 @@ import type { Bucket } from '~/functions/buckets';
 import { updateRoomSettings } from '~/functions/rooms';
 import { useToast } from '~/hooks/use-toast';
 import { BOARD_SIZE, unionBucketWords } from '~/lib/deal';
+import { MODE_INFO } from '~/lib/modes';
+import type { GameMode } from '~/lib/room-events';
 
 export function RoomSettingsDialog({
   room,
   buckets,
 }: {
-  room: { id: string; code: string; hasPassword: boolean; buckets: { id: string }[] };
+  room: {
+    id: string;
+    code: string;
+    hasPassword: boolean;
+    mode: GameMode;
+    buckets: { id: string }[];
+  };
   buckets: Bucket[];
 }) {
   const router = useRouter();
@@ -33,9 +52,11 @@ export function RoomSettingsDialog({
 
   const [open, setOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState(() => room.buckets.map((bucket) => bucket.id));
+  const [mode, setMode] = useState<GameMode>(room.mode);
   const [passworded, setPassworded] = useState(room.hasPassword);
   const [newPassword, setNewPassword] = useState('');
   const [saving, setSaving] = useState(false);
+  const [confirmingModeChange, setConfirmingModeChange] = useState(false);
 
   const uniqueWords = unionBucketWords(
     buckets.filter((bucket) => selectedIds.includes(bucket.id)),
@@ -46,16 +67,27 @@ export function RoomSettingsDialog({
   }
 
   const needsPasswordValue = passworded && !room.hasPassword && newPassword === '';
-  const canSave = selectedIds.length > 0 && uniqueWords >= BOARD_SIZE && !needsPasswordValue && !saving;
+  const canSave =
+    selectedIds.length > 0 && uniqueWords >= BOARD_SIZE && !needsPasswordValue && !saving;
 
-  async function handleSave() {
+  function handleSave() {
     if (!canSave) return;
+    // A mode switch resets the current game, so it gets an explicit confirmation.
+    if (mode !== room.mode) {
+      setConfirmingModeChange(true);
+      return;
+    }
+    void save();
+  }
+
+  async function save() {
     setSaving(true);
     try {
       await updateRoomSettings({
         data: {
           roomId: room.id,
           bucketIds: selectedIds,
+          mode,
           password: !passworded
             ? room.hasPassword
               ? { action: 'remove' }
@@ -98,6 +130,16 @@ export function RoomSettingsDialog({
         </DialogHeader>
 
         <div className="space-y-2">
+          <Label>Game Mode</Label>
+          <GameModeSelector value={mode} onChange={setMode} />
+          {mode !== room.mode && (
+            <p className="text-xs text-destructive">
+              Changing the game mode starts a new game for everyone in the room.
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-2">
           <Label>Word Buckets</Label>
           <div className="rounded-md border divide-y max-h-52 overflow-y-auto">
             {buckets.map((bucket) => (
@@ -121,7 +163,9 @@ export function RoomSettingsDialog({
           </div>
           <p
             className={
-              uniqueWords >= BOARD_SIZE ? 'text-xs text-muted-foreground' : 'text-xs text-destructive'
+              uniqueWords >= BOARD_SIZE
+                ? 'text-xs text-muted-foreground'
+                : 'text-xs text-destructive'
             }
           >
             {uniqueWords} unique words selected (at least {BOARD_SIZE} needed)
@@ -161,6 +205,29 @@ export function RoomSettingsDialog({
             Save Changes
           </Button>
         </DialogFooter>
+
+        <AlertDialog open={confirmingModeChange} onOpenChange={setConfirmingModeChange}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Switch {room.code} to {MODE_INFO[mode].label}?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Changing the game mode deals a new game — the current board and progress are reset
+                for everyone in the room.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => save()}
+              >
+                Switch &amp; Restart
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </DialogContent>
     </Dialog>
   );

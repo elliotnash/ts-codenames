@@ -1,9 +1,10 @@
 import { useDebouncedValue } from '@mantine/hooks';
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router';
+import { Link, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { Check, LoaderIcon, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { GridBG } from '~/components/background';
+import { GameModeSelector } from '~/components/game-mode-selector';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Checkbox } from '~/components/ui/checkbox';
@@ -16,6 +17,7 @@ import { useAuthOptions } from '~/hooks/use-auth';
 import { useToast } from '~/hooks/use-toast';
 import { BOARD_SIZE, unionBucketWords } from '~/lib/deal';
 import { ROOM_CODE_REGEX } from '~/lib/room-codes';
+import type { GameMode } from '~/lib/room-events';
 
 export const Route = createFileRoute('/create')({
   beforeLoad: async ({ context: { queryClient }, location }) => {
@@ -33,6 +35,7 @@ function RouteComponent() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const [mode, setMode] = useState<GameMode>('classic');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
@@ -54,7 +57,9 @@ function RouteComponent() {
   });
 
   const codeTaken =
-    normalizedCode !== '' && normalizedCode === debouncedCode && availability.data?.available === false;
+    normalizedCode !== '' &&
+    normalizedCode === debouncedCode &&
+    availability.data?.available === false;
 
   function toggleBucket(id: string, checked: boolean) {
     setSelectedIds((ids) => (checked ? [...ids, id] : ids.filter((other) => other !== id)));
@@ -73,6 +78,7 @@ function RouteComponent() {
           code: normalizedCode || undefined,
           bucketIds: selectedIds,
           password: password || undefined,
+          mode,
         },
       });
       await navigate({ to: '/game/$code', params: { code: roomCode } });
@@ -98,6 +104,11 @@ function RouteComponent() {
         </div>
 
         <form className="space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-2">
+            <Label>Game Mode</Label>
+            <GameModeSelector value={mode} onChange={setMode} />
+          </div>
+
           <div className="space-y-2">
             <Label>Word Buckets</Label>
             <div className="rounded-md border bg-card/25 backdrop-blur-sm divide-y max-h-64 overflow-y-auto">
@@ -125,7 +136,9 @@ function RouteComponent() {
             </div>
             <p
               className={
-                uniqueWords >= BOARD_SIZE ? 'text-xs text-muted-foreground' : 'text-xs text-destructive'
+                uniqueWords >= BOARD_SIZE
+                  ? 'text-xs text-muted-foreground'
+                  : 'text-xs text-destructive'
               }
             >
               {uniqueWords} unique words selected (at least {BOARD_SIZE} needed)
